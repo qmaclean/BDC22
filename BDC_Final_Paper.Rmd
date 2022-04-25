@@ -514,7 +514,7 @@ gg_rink <- function(side = "right", specs = "nhl"){
 ```
 
 ## Introduction
-Currently, there is a lot of advanced analytics focusing on [shot quality, defending shots/goals](https://drive4five.blog/2021/01/06/hockey-advanced-statistics-stats-nhl-sports-analytics-aidan-resnick/) and play during even strength.  During the Tracking Data Panel at the 2022 Ottawa Hockey Analytics (OTTHAC), measuring defensive performance was posed as the current area of tracking analytics that had the biggest opportunity and the most difficult to solve. Shawn Ferris echoed this sentiment in a 2020 hockey-graphs where he said [there is still much more to learn about shorthanded defense with respect to understanding optimal in-zone formations and evaluating individual players](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218).  This paper aims to model around successful defensive plays as a way to scout and identify defensive performance during penalty plays. 
+Currently, there are a lot of advanced analytics metrics focusing on [shot quality, defending shots/goals](https://drive4five.blog/2021/01/06/hockey-advanced-statistics-stats-nhl-sports-analytics-aidan-resnick/) and play during even strength.  During the Tracking Data Panel at the 2022 Ottawa Hockey Analytics (OTTHAC), measuring defensive performance was posed as the current area of tracking analytics that had the biggest opportunity and the most difficult to solve. Shawn Ferris echoed this sentiment in a 2020 hockey-graphs where he said [there is still much more to learn about shorthanded defense with respect to understanding optimal in-zone formations and evaluating individual players](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218).  This paper aims to model around successful defensive plays as a way to scout and identify defensive performance during penalty plays. 
 
 A successful defensive play is based on the following event:
 
@@ -638,7 +638,7 @@ The following charts help to evaluate how effective our model was at fitting. Th
 The second check is to evaluate whether the distribution has reached a convergence towards the target distribution (can be more difficult with MLE models). The second chart (on right) helps to show that variables of the model had proper convergence. We used [Gelman and Rubin's scale reduction factor](https://mc-stan.org/docs/2_18/reference-manual/notation-for-samples-chains-and-draws.html) or *Rhat*, which helps to show variance within the chains. Typically, you'd want a number near 1 and less than 1.05. The distribution of all variables and intercepts (defensive players) below seem to show a proper convergence of variables within the model. Given there is evidence of proper variance among defenders and the variables had properly converged, we can conclude that this Bayesian model can be helpful to use to evaluate defensive play during power plays. 
 
 
-```{r a2,echo=FALSE,message=FALSE,fig.width = 10, fig.height = 5,fig.asp = .62}
+```{r a2,echo=FALSE,message=FALSE,fig.width = 10, fig.height = 3,fig.asp = .62}
 
 color_scheme_set("blue")
 a1<-pp_check(pass.success.mod.mcmc) +
@@ -786,7 +786,7 @@ play_plot_df<-pass.frame.sim.preds %>%
     DPAA_Pass_Pct = round(pos_play / play,2)
   ) %>%
   arrange(desc(DPAA)) %>%
-  dplyr::select(defender_team,flag_url,DPAA,power_plays,n,total_pos,DPAAPct,play,pos_play,DPAA_Pass_Pct)
+  dplyr::select(defender_team,flag_url,DPAA,power_plays,n,DPAAPct,play,DPAA_Pass_Pct)
   
 ####### create GT Table
 team_function <- function(data, ...){
@@ -801,17 +801,19 @@ team_function <- function(data, ...){
         )
       }
     ) %>%
+      fmt_percent(
+    columns = c(DPAAPct,DPAA_Pass_Pct),
+                decimals = 0
+  ) %>%
     cols_label(
       flag_url = "",
       defender_team = "Defender Team",
       n = "Defending Plays",
       power_plays = "Power Plays",
-      total_pos = "Positive Defended Plays",
-      DPAAPct = "Positive Defended Plays Pct",
+      DPAAPct = "Positive Defended Plays %",
       play = "Passes",
-      pos_play = "Positive Defended Passes",
-      DPAA = "Avg. DPAA",
-      DPAA_Pass_Pct = "Positive Defended Passing Plays Pct"
+      DPAA = "DPAA",
+      DPAA_Pass_Pct = "Positive Defended Passing Plays %"
     ) %>% 
    data_color(
       columns = vars(DPAA),
@@ -906,6 +908,7 @@ asp<-1.5
 ggplot(data = team_plot_df,aes(x_coord,y_coord)) +
   gg_rink(side="right") +
   stat_density_2d(aes(fill=DPAA_group),geom="polygon",size=5,alpha=0.5) +
+  #geom_density_2d(aes(alpha=..level..),color="light grey") +
   geom_point(aes(x=x_coord,y=y_coord),color="grey",alpha=.4) +
   ggimage::geom_image(aes(x=10,y=-25,image = flag_url),
                       size=.10,by="width",asp=asp) +
@@ -944,29 +947,35 @@ ggplot(data = team_plot_df,aes(x_coord,y_coord)) +
 
 ### Individual Performance Analysis
 
+#### Top Performers
 To ensure proper scouting of individual performers, simulating the posteriors (using 10,000 iterations) helps to ensure the stability of the MCMC metrics. We can see that players from Finland and USA were the top performers (even after the simulated posteriors). One reason as to why is that these players tend to be closer to the player they are guarding than the average defender (15m) with the exception of Megan Keller. Megan Keller however was the best of these defenders in the tournament in defending against passes (at least 5 passes), which makes her valuable specialist to the USA team. Although Viivi Vainikka had the highest DPAA, this was due to a majority of her plays coming from successfully defending Dump Ins/Outs (easier plays to defend against). Ronja Savolainen guarded nearly 43 offensive players and had an impressive passing DPAA at 0.263. When simulating the posteriors (using 10,000 sims), we can see that she also had the lowest relative standard deviation to her simulated DPAA mean, which helps to show her consistent play for Finland and likely a big reason for their positive defense. The top 3 DPAA (MCMC) defenders for each country (7+ plays): 
 
-**Canada**: \
+**Canada**: 
+
 + *Marie-Philip Poulin (Center)*: 0.175 \
 + *Blayre Turnbull (Center)*: 0.131 \
 + *Brianne Jenner (Center)*: -0.009 \
 
-**Finland** \
+**Finland** 
+
 + *Viivi Vainikka (Center)*: 0.488 \
 + *Minnamari Tuominen (Defense)*: 0.472 \
 + *Ronja Savolainen (Defense)*: 0.264 \
 
-**ROC** \
+**ROC** 
+
 + *Oxana Bratishcheva (Center)*: 0.173 \
 + *Nina Pirogova (Center)*: 0.108 \
 + *Olga Sosina (Left Wing)*: 0.068 \
 
-**Switzerland** \
+**Switzerland** 
+
 + *Phoebe Staenz (Center)*: 0.075 \
 + *Noemi Ryhner (Center)*: 0.023 \
 + *Lara Stalder (Center)*: -0.031 \
 
-**USA** \
+**USA** 
+
 + *Megan Keller (Defense)*: 0.477 \
 + *Abby Roque (Center)*: 0.375 \
 + *Amanda Kessel (Center)*: 0.203 \
@@ -1051,11 +1060,11 @@ tab_function <- function(data, ...){
       n = "Plays",
       mcmc.mean = "DPAA",
       mcmc.sd = "DPAA Sdev",
-      sim.mean = "DPAA (Sim Posteriors)",
-      sim.sd = "DPAA Sdev (Sim Posteriors)",
-      closest_opp_player_separation = "Avg. Separation to Closest Player (m)",
+      sim.mean = "DPAA Sim",
+      sim.sd = "DPAA Sim Sdev",
+      closest_opp_player_separation = "Avg. Defender Separation (m)",
       Pass = "Pass Plays",
-      Pass_PDAA = "DPAA (Passing Plays)"
+      Pass_PDAA = "Pass DPAA"
     ) %>% 
     data_color(
       columns = vars(mcmc.mean),
@@ -1140,33 +1149,40 @@ a
 ```
 
 
+#### Bottom Performers 
+
 The bottom individual performers were primarily from Canada and Switzerland with the exception of Susanna Tapani. Higher separation from the players guarding than average and total amount of players guarding (40 was 8th highest amount of players closest to) appear to be the top reason for Susanna's performance. This is interesting given Ronja had an opposite result and guarding a similar amount of players. The player that saw the most amount of defensive plays was Jocelyne Larocque and still was able to defend at a higher rate (-0.029) than several of her Canadian teammates. This is due to what was mentioned earlier in her play close to the net. Another observation is the ROC having only 1 negative DPAA despite overall inconsistent play. There overall defensive formation can be attributed as the reason their low penalty killing rate. 
 
 
 **Canada**: \
+
 + *Rebecca Johnston (Center)*: -0.219 \
 + *Natalie Spooner (Center)*: -0.187 \
 + *Mich Zandee-Hart (Defense)*: -0.148 \
 
 
 **Finland** \
+
 + *Susanna Tapani (Center)*: -0.227 \
 + *Sini Karjalainen (Defense)*: -0.199 \
 + *Ella Viitasuo (Defense)*: -0.040 \
 
 
 **ROC** \
+
 + *Fanuza Kadirova (Left Wing)*: -0.088 \
 + *Maria Batalova (Center)*: 0.014 \
 + *Angelina Goncharenko (Defense)*: 0.017 \
 
 
 **Switzerland** \
+
 + *Lara Christen (Defense)*: -0.226 \
 + *Nicole Vallario (Defense)*: -0.225 \
 + *Alina Marti (Center)*: -0.218 \
 
 **USA** \
+
 + *Alex Carpenter (Left Wing)*: -0.143 \
 + *Lee Stecklein (Defense)*: -0.060 \
 + *Dani Cameranesi (Center)*: 0.003 \
@@ -1174,9 +1190,8 @@ The bottom individual performers were primarily from Canada and Switzerland with
 
 *Not listing passing plays below, given a majority/all were passing plays*
 
-To do: 
-**Fix Nicole Vallario**
-
+To do 
+*Add more observations*
 ```{r a8,echo=FALSE,message=FALSE,warning=FALSE,fig.align='center'}
 
 
@@ -1201,7 +1216,7 @@ bot_tab_data<- defender.sim.mcmc %>%
              "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/170px-Flag_of_Switzerland.svg.png",
            TRUE ~ flag_url),
       headshot_url = case_when(
-        closest_defensive_player == "Nicole Vallario" ~ "https://tommiesports.com/images/2021/12/1/Nicole_Vallario.jpg",
+        closest_defensive_player == "Nicole Vallario" ~ "https://news.stthomas.edu/wp-content/uploads/2022/01/211123mrb120_022.jpg",
         TRUE ~ headshot_url
       )) %>%
   arrange(mcmc.mean) %>%
@@ -1233,12 +1248,12 @@ bot_tab_function <- function(data, ...){
       fn = function(x){
         web_image(
           url = x,
-          height = 40
+          height = 30
         )
       }
     ) %>%
-    cols_width(vars(flag_url) ~ px(100),
-               vars(headshot_url) ~ px(40)) %>%
+    cols_width(vars(flag_url) ~ px(50),
+               vars(headshot_url) ~ px(60)) %>%
     cols_label(
       headshot_url = "",
       flag_url = "",
@@ -1248,9 +1263,9 @@ bot_tab_function <- function(data, ...){
       n = "Passes",
       mcmc.mean = "DPAA",
       mcmc.sd = "DPAA Sdev",
-      sim.mean = "DPAA (Sim Posteriors)",
-      sim.sd = "DPAA Sdev (Sim Posteriors)",
-      closest_opp_player_separation = "Avg. Separation to Closest Player (m)"
+      sim.mean = "DPAA Sim",
+      sim.sd = "DPAA Sim Sdev",
+      closest_opp_player_separation = "Avg. Defender Separation (m)"
     ) %>% 
     data_color(
       columns = vars(mcmc.mean),
@@ -1310,7 +1325,7 @@ bot_tab_function <- function(data, ...){
       ))  %>%
     tab_header(
       title = md("Bottom Defending Plays Above Average"),
-      subtitle = md("Data: Stathletes | Int'l Games: 2022 Winter Olympics  | Min. 6 Plays defended; DPAA < 0")
+      subtitle = md("Data: Stathletes | Int'l Games: 2022 Winter Olympics  | Min. 7 Plays defended; DPAA < 0")
     ) %>%
   fmt_missing(
     columns = everything(),
@@ -1326,18 +1341,29 @@ bot_tab_function()
 
 ```
 
-In examining the top players positioning for defending plays: 
-One common thread amongst these players is there ability to guard the blue line, which may be more indicative of the team strategy or individual performance
+
+#### High Volume Performers
+Below shows a view of the 
+
+
 ```{r a9,echo=FALSE,message=FALSE,warning=FALSE,fig.align='center'}
 
 
+### top defenders
+##    "Viivi Vainikka",
+##    "Megan Keller",
+##    "Minnamari Tuominen",
+##    "Abby Roque",
+##    "Ronja Savolainen"
+
 plot_df<-pass.frame.sim.preds %>%
   dplyr::filter(closest_defensive_player %in% c(
-    "Viivi Vainikka",
-    "Megan Keller",
-    "Minnamari Tuominen",
-    "Abby Roque",
-    "Ronja Savolainen"
+    "Jocelyne Larocque",
+    "Sarah Forster",
+    "Michelle Karvinen",
+    "Ronja Savolainen",
+    "Jenni Hiirikoski",
+    "Mich Zandee-Hart"
   )) %>%
   dplyr::mutate(DPAA = fitted.values - wo_defender) %>%
   dplyr::select(playId,closest_defensive_player,x_coord,y_coord,x_coord_2,y_coord_2,DPAA,event,event_successful,defender_team) %>%
@@ -1348,15 +1374,14 @@ plot_df<-pass.frame.sim.preds %>%
             y_coord = y_coord - 45,
             x_coord = ifelse(x_coord > 90,x_coord - 5,x_coord),
             y_coord = ifelse(y_coord > 30,y_coord - 5,y_coord),
-            DPAA = as.numeric(as.character(mean(DPAA,na.rm = T))),
-            DPAA = abs(DPAA)) %>%
+            DPAA = as.numeric(as.character(mean(DPAA,na.rm = T)))) %>%
   distinct() %>%
   ungroup() %>%
   mutate(DPAA_group = case_when(
-    DPAA >= 0.5 ~ "A. DPAA (0.5+)",
-    DPAA >= 0.4 & DPAA < 0.5 ~ "B. DPAA (0.4 to 0.5)",
-    DPAA >= 0.3 & DPAA < 0.4 ~ "C. DPAA (0.3 to 0.4)",
-    DPAA >= 0.2 & DPAA < 0.3 ~ "D. DPAA (0.2 to 0.3)",
+    DPAA > 0.2 ~ "A. Excellent (0.2+)",
+    DPAA <= 0.2 & DPAA > 0 ~ "B. Above Average (0 to 0.2)",
+    DPAA < 0 & DPAA >= -0.2 ~ "C. Below Average (-0.2 to 0)",
+    DPAA < -0.2 ~ "D. Poor (-0.2 or less)",
     TRUE ~ as.character(NA)
     )
     ,
@@ -1367,88 +1392,75 @@ plot_df<-pass.frame.sim.preds %>%
     defender_team == "Switzerland" ~ "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/170px-Flag_of_Switzerland.svg.png",
     defender_team == "Canada" ~ "https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Flag_of_Canada.svg/1200px-Flag_of_Canada.svg.png",
     TRUE ~ as.character(NA)
-  ),
-  headshot_url = case_when(
-    closest_defensive_player == "Viivi Vainikka" ~ "https://results.eurosport.com/images/athletes/l/1005564.png",
-    closest_defensive_player == "Megan Keller" ~ "http://d2a3o6pzho379u.cloudfront.net/138315.jpg",
-    closest_defensive_player == "Minnamari Tuominen" ~ "http://d2a3o6pzho379u.cloudfront.net/119313.jpg",
-    closest_defensive_player == "Abby Roque" ~ "https://assets.ngin.com/attachments/profiles/6b96-169970874/USA_ROQUE_ABBY.jpg",
-    closest_defensive_player == "	
-Ronja Savolainen" ~ "http://d2a3o6pzho379u.cloudfront.net/137120.jpg
-",
-TRUE ~ as.character(NA)
-)
-    )%>%
+  ))%>%
   arrange(match(closest_defensive_player,c( 
-    "Viivi Vainikka",
-    "Megan Keller",
-    "Minnamari Tuominen",
-    "Abby Roque",
-    "Ronja Savolainen"
+    "Jocelyne Larocque",
+    "Sarah Forster",
+    "Michelle Karvinen",
+    "Ronja Savolainen",
+    "Jenni Hiirikoski",
+    "Mich Zandee-Hart"
     )))
   
 neworder<-c(     
-    "Viivi Vainikka",
-    "Megan Keller",
-    "Minnamari Tuominen",
-    "Abby Roque",
-    "Ronja Savolainen"
+    "Jocelyne Larocque",
+    "Sarah Forster",
+    "Michelle Karvinen",
+    "Ronja Savolainen",
+    "Jenni Hiirikoski",
+    "Mich Zandee-Hart"
   )
 #img_AV<-readPNG(getURLContent('https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Finland.svg/640px-Flag_of_Finland.svg.png'))
 
 new_plot<-plot_df
 new_plot$group<-factor(new_plot$closest_defensive_player,
                        levels=c(    
-    "Viivi Vainikka",
-    "Megan Keller",
-    "Minnamari Tuominen",
-    "Abby Roque",
-    "Ronja Savolainen"
+    "Jocelyne Larocque",
+    "Sarah Forster",
+    "Michelle Karvinen",
+    "Ronja Savolainen",
+    "Jenni Hiirikoski",
+    "Mich Zandee-Hart"
     ))
 
 
 
-asp<-2.5
+#asp<-2.5
 
 #new_plot %>%
-ggplot(data = new_plot,aes(x=x_coord,y=y_coord)) +
-  geom_point(aes(x=x_coord,y=y_coord),color="grey",alpha=.7) +
-  gg_rink(side='right') +
-  #stat_density2d(aes(fill = ..level..,alpha=..level..),size = 2, bins = 5,geom="polygon",show.legend =F) +
-  stat_density_2d(aes(fill=DPAA_group),geom="polygon",size=5,alpha=0.5) +
-  ggimage::geom_image(aes(x = 10, y = -25, image = flag_url),
-                      size = .10, by = "width", asp = asp
-  ) +
-  facet_wrap(~group,ncol=2) +
-    scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  theme_void() +
-  theme(panel.grid = element_blank(),
+asp<-1.5
+ggplot(data = new_plot,aes(x_coord,y_coord)) +
+  gg_rink(side="right") +
+  stat_density_2d(aes(fill=DPAA_group,alpha=(..level..)^2),geom="polygon",size=3) +
+  geom_density_2d(aes(alpha=..level..),color="light grey") +
+  #geom_density_2d_filled(contour_var = "count") +
+  geom_point(aes(x=x_coord,y=y_coord),color="grey",alpha=.4) +
+  ggimage::geom_image(aes(x=10,y=-25,image = flag_url),
+                      size=.10,by="width",asp=asp) +
+  scale_fill_manual(values = c("red", "orange",
+                               "light blue", "blue",
+                               "green")) +
+  facet_wrap(~closest_defensive_player,ncol = 3) +
+    theme_void() +
+    theme(panel.grid = element_blank(),
         axis.line = element_line(),
         axis.ticks=  element_blank(),
         axis.text = element_blank(),
         plot.title = element_text(hjust = .5,size=14,margin=margin(5,0,10,0)),
         plot.subtitle = element_text(hjust = .5,size=10,margin=margin(0,0,15,0)),
         legend.position = "top",
-        panel.spacing.x = unit(1,"lines")
-        )+
-  guides(alpha = "none",
-         color = guide_legend("DPAA")
-                              
-         ) +
+        panel.spacing.x = unit(1,"lines"),
+        legend.text = element_text(size=8)
+        ) +
   labs(x = "",
        y = "",
-       title = "Top 5 Penalty Defenders ",
-       subtitle = "Positioning of Plays Made",
-       fill = "DPAA") +
-  #scale_fill_brewer(palette="RdYlBu")
-  
-  
-  scale_fill_manual(values = c(
-"#F6412D",
-"#FF9800",
-"#FFC100",
-"#e8c351"))
+       title = "High Volume Defender Comparison",
+       subtitle = "Shows concentration of plays  made | DPAA ",
+       legend = "DPAA",
+       fill = "DPAA",
+       caption = "These defenders were listed as the closest defensive player for the highest amount of plays") +
+  guides(alpha = "none",
+         color = guide_legend(override.aes = list(fill = NA)))
 
 
 
@@ -1457,21 +1469,23 @@ ggplot(data = new_plot,aes(x=x_coord,y=y_coord)) +
 
 ```
 
-Game Notes: 
-USA outshot Canada 53-27, although Brianne Jenner scored on the power play, USA held scoreless on their first power play. Canada also scored on a power play. USA had a 6-4 advantage but remained unable to score. In essense, US weren't able to capitalize on power play and Canada's below average defense (credit to great goaltending)k
+
+## Conclusion
+
+--- List key action points and conclusion
+--- List application to other aspects
 
 
 
 
 
-
-
-
-References: 
+## References
 
 https://www.baseballprospectus.com/leaderboards/catching/
 
 https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/
+
+https://www.baseballprospectus.com/news/article/25514/moving-beyond-wowy-a-mixed-approach-to-measuring-catcher-framing/
 
 http://mjskay.github.io/tidybayes/articles/tidy-rstanarm.html
 
@@ -1481,6 +1495,8 @@ https://www.iihf.com/en/events/2022/olympic-w/schedule
 https://github.com/mtthwastn/statswithmatt/blob/master/hockey-with-r/gg-rink.R
 
 https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218
+
+https://www.statsportsconsulting.com/wp-content/uploads/Deffensive-Efficiency-Metrics-DEMs.pdf
 
 To Do 
 -Find more defensive papers

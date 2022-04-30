@@ -1,9 +1,13 @@
 ---
-title: "Big Data Cup"
+title: "Introducing DPAA: A Bayesian Approach To Evaluating Special Teams Defending Play Performance"
 author: "Quinn MacLean"
-date: "4/10/2022"
-output: html_document
-theme: journal
+theme: cerulean
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
@@ -91,6 +95,19 @@ pass_metrics<-pass.frame.sim.preds %>%
             separation = mean(separation.y,na.rm = T)
             )
 
+team_pass_metrics<-pass.frame.sim.preds %>%
+  left_join(pass_join,by=c("playId","jn")) %>%
+  group_by(defender_team) %>%
+  summarize(n = n_distinct(playId),
+            dis_event_x_abs = mean(dis_event_x_abs.y,na.rm=T),
+            dis_event_des_x_abs = mean(dis_event_des_x_abs.y,na.rm = T),
+            pass_distance = mean(pass_distance,na.rm = T),
+            closest_opp_action_separation = mean(closest_opp_action_separation.y,na.rm = T),
+            closest_opp_player_separation = mean(closest_opp_player_separation.y,na.rm = T),
+            net_separation = mean(net_separation.y,na.rm = T),
+            separation = mean(separation.y,na.rm = T)
+            )
+
 
 pass.frame.sim.preds<-pass.frame.sim.preds %>%
   left_join(roster,by=c("defender_num" = "jn","defender_team" = "team_name")) 
@@ -108,6 +125,8 @@ pass.frame.sim.preds<-pass.frame.sim.preds %>%
 ###
 ####################################
 
+
+###### https://github.com/mtthwastn/statswithmatt/blob/master/hockey-with-r/gg-rink.R ####
 
 
 gg_rink <- function(side = "right", specs = "nhl"){
@@ -514,7 +533,7 @@ gg_rink <- function(side = "right", specs = "nhl"){
 ```
 
 ## Introduction
-Currently, there are a lot of advanced analytics metrics focusing on [shot quality, defending shots/goals](https://drive4five.blog/2021/01/06/hockey-advanced-statistics-stats-nhl-sports-analytics-aidan-resnick/) and play during even strength.  During the Tracking Data Panel at the 2022 Ottawa Hockey Analytics (OTTHAC), measuring defensive performance was posed as the current area of tracking analytics that had the biggest opportunity and the most difficult to solve. Shawn Ferris echoed this sentiment in a 2020 hockey-graphs where he said [there is still much more to learn about shorthanded defense with respect to understanding optimal in-zone formations and evaluating individual players](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218).  This paper aims to model around successful defensive plays as a way to scout and identify defensive performance during penalty plays. 
+Currently, there are a lot of advanced analytics metrics focusing on [shot quality, defending shots/goals](https://drive4five.blog/2021/01/06/hockey-advanced-statistics-stats-nhl-sports-analytics-aidan-resnick/) and play during even strength.  This year's Big Data Cup focuses on exploring penalty play as a way to gain more insights into various "special teams" strategies. During the Tracking Data Panel at the 2022 Ottawa Hockey Analytics Conference (OTTHAC), measuring defensive performance was posed as the current area of tracking analytics that had the biggest opportunity to add more depth to. Shawn Ferris echoed this sentiment in a 2020 hockey-graphs article where he said [there is still much more to learn about shorthanded defense with respect to understanding optimal in-zone formations and evaluating individual players](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218).  This paper aims to build on the narrative by using 2022 Women's Olympic Hockey event & tracking data to model around successful defensive plays as a way to scout defensive performance during penalty plays. 
 
 A successful defensive play is based on the following event:
 
@@ -523,7 +542,7 @@ A successful defensive play is based on the following event:
 + Takeaway \
 + Unsuccessful Pass \
 + Dump In/Out resulting in change of possession \
-+ Failed Shot attempt \
++ Blocked Shot attempt \
 + Unsuccessful Zone Entry \
 + Puck Recovery resulting in change of possession \
 
@@ -531,20 +550,20 @@ Current event metrics assign defensive play credit for takeaways, puck recoverie
 
 
 ## Modelling Approach
-Using a similar approach to [Jonathan Judge from Baseball Prospectus](https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/), a generalized linear mixed effects model using Monte Carlo Markov Chains (MCMC) was created to identify, which defensive player (based on closest defensive player assignment to each offensive player) had the greatest effect in adjusting the outcome of a defensive play. Our MCMC uses 5 chains and 10,000 iterations per chain to simulate and get an effective total sample size. In the mixed effects model, we fit the closest defensive player as the random effect modeling for the assumption that a defensive player can alter the result of a play, especially for penalty killing situations where a defensive play is even more important to the end result of the game. Through our exploratory analysis, we found that the following fixed variables were identified as determining a successful defensive play: \
+Using a similar approach to [Jonathan Judge from Baseball Prospectus](https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/), a Generalized Linear Mixed Effects Model using Monte Carlo Markov Chains (MCMC) was created to identify, which defensive player (based on closest defensive player assignment to each offensive player) had the greatest effect in adjusting the outcome of a defensive play. Our MCMC uses 5 chains and 10,000 iterations per chain to simulate and get an effective total sample size. The modeled dataset contains 1,968 different defensive play matchups (offensive player matched up to closest defensive player) for 507 unique events. In the mixed effects model, we fit the closest defensive player (for each 1,968 matchup) as the random effect modeling for the assumption that a defensive player can alter the result of a play. Through our exploratory analysis, we found that the following fixed variables  determined a successful defensive play: \
 
-+ **Separation**: Avg. Offensive player separation or distance to any player on the ice during an event \
-+ **Net Separation**: Avg. Offensive player separation to the net during an event \
-+ **Closest Opposition Player Separation**: Avg. Offensive player separation to opposition team during an event \
-+ **Closest Teammate Player Separation**: Avg. Offensive player separation to offensive team during an event \
++ **Separation**: Avg. offensive player separation or distance to any player on the ice during an event \
++ **Net Separation**: Avg. offensive player separation to the net during an event \
++ **Closest Opposition Player Separation**: Avg. offensive player separation to the closest defender during an event \
++ **Closest Teammate Player Separation**: Avg. offensive player separation to closest teammate during an event \
 + **Absolute x-Distance to Passer/Shooter**: Avg. distance of an offensive player to the passer or shooter \
 + **Absolute x-Distance to Event Recipient**: Avg. distance of an offensive player to the recipient of the event \
 
-All separation and distance variables were centered and scaled to ensure a consistent relative effect of variables in the model. 
+All separation and distance variables were centered and scaled to ensure a consistent relative effect of the variables in the model. It is important to note that the tracking data uses Stathletes' Computer Vision technology to identify coordinates of players on ice using the main Olympic television stream. It is possible that there could have been players coming in and out of the camera view. This paper operates under the assumption that the players in frame are important to outcome of the play. 
 
 
 ### Model Results & Evaluation
-In viewing the model results, there is evidence (τ00) to show that there is wide variability (0.78) that exists in a defender's ability to alter a play's outcome. This premise gives us basis that there are specialists in the tournament that defend well in power play scenarios. This framework can help to identify those "special teams" players who can be on ice to defend against power plays. Outside of an individual players' ability to defend, an offensive players spacing and separation from each player tends to determine the outcome of a successful play. The defender's ability to close in on the shooter and passer has the greatest ability of causing an unsuccessful offensive play. Another observation is a fairly high Monte Carlo standard error of the variables in the model (typically want roughly less than 5%) and this is likely derived from different event types included in the data.  
+In viewing the model results, there is evidence (τ00) to show that there is wide variability (0.78) that exists in a defender's ability to alter a play's outcome. This premise gives us basis that there are specialists in the tournament that defend well in power play scenarios. This framework can help to identify those "special teams" players who can be on ice to defend against power plays. Outside of an individual players' ability to defend, an offensive players spacing and separation from each player tends to determine the outcome of a successful play. This tells us that the defender's main goal is to reduce offensive player's separation from anyone on the ice. Another observation is a fairly high Monte Carlo standard error of the variables in the model (typically want roughly less than 5%) and this is likely derived from different event types included in the data.  
 
 ```{r a1,echo=FALSE,message=FALSE,warning=FALSE,fig.align='center'}
 
@@ -616,9 +635,6 @@ table_sum %>%
       title = md("Defended Play Success Model Summary"),
       subtitle = md("Method: Bayesian MCMC GLM Mixed Effects Model | Chains: 5 | 10,000 Iterations")
     ) %>%
-  tab_source_note(
-    source_note = md("Data for model was centered & scaled")
-  ) %>% 
   tab_style(
     style = list(
       cell_fill(color = "#FED8B1")
@@ -626,16 +642,19 @@ table_sum %>%
     locations = cells_body(
       columns = vars(Coefficient,Estimates,`Std Error`, `CI Low (5%)`,`CI High (95%)`), # not needed if coloring all columns
       rows = 8)
-  )
+  ) 
+#%>%
+#  gtsave("DPAA_Play.png")
 
 
 
 ```
 
 
-The following charts help to evaluate how effective our model was at fitting. The first check (on left) is on how well the posterior does in its predictions. This chart will show how *Yrep* (expected defended plays in the replicated simulations) compares to *Y* (actual defended play results). We can see that the model observed the binomial distribution of the output (successfully defended play or not) fairly well, which leads us to believe there are sufficient modeling results. 
+For evaluating the model, we used a PPC (posterior predictive checking) which takes draws from the MCMC and compares the Yrep (expected defended plays in the replicated simulations) to Y (actual defended play results). We saw that the model observed the binomial distribution of the output (successfully defended play or not) fairly well, which leads us to believe there are sufficient modeling results.
 
-The second check is to evaluate whether the distribution has reached a convergence towards the target distribution (can be more difficult with MLE models). The second chart (on right) helps to show that variables of the model had proper convergence. We used [Gelman and Rubin's scale reduction factor](https://mc-stan.org/docs/2_18/reference-manual/notation-for-samples-chains-and-draws.html) or *Rhat*, which helps to show variance within the chains. Typically, you'd want a number near 1 and less than 1.05. The distribution of all variables and intercepts (defensive players) below seem to show a proper convergence of variables within the model. Given there is evidence of proper variance among defenders and the variables had properly converged, we can conclude that this Bayesian model can be helpful to use to evaluate defensive play during power plays. 
+The second check is to evaluate whether the distribution has reached a convergence towards the target distribution (can be more difficult with MLE models). We used [Gelman and Rubin’s scale reduction factor](https://mc-stan.org/docs/2_18/reference-manual/notation-for-samples-chains-and-draws.html) or *Rhat*, which helps to show variance within the chains. Typically, you’d want a number near 1 and less than 1.05. The distribution of all variables and intercepts (defensive players) appeared to show a proper convergence of variables within the model (no *Rhat* > 1.05). Given there is evidence of proper variance among defenders and the variables had properly converged, we can conclude that this Bayesian MCMC model can be helpful to use to evaluate defensive play during power plays.
+
 
 
 ```{r a2,echo=FALSE,message=FALSE,fig.width = 10, fig.height = 3,fig.asp = .62}
@@ -644,31 +663,37 @@ color_scheme_set("blue")
 a1<-pp_check(pass.success.mod.mcmc) +
   theme(
     legend.position = "top",
-    plot.title = element_text(size=12,hjust=0.5)
+    plot.title = element_text(size=25,hjust=0.5),
+    axis.text = element_text(size=25),
+    legend.text = element_text(size=25)
   ) + 
   labs(
     title = "Posterior Check")
+#a1
 
 posterior<-as.matrix(pass.success.mod.mcmc)
 
 a2<-mcmc_areas(posterior, regex_pars = c("separation","dis"), bw = "SJ",
            rhat = rhat(pass.success.mod.mcmc, regex_pars = c("separation","dis"))) +
   theme(
-     plot.title = element_text(size=12,hjust=0.5)
+     plot.title = element_text(size=12,hjust=0.5),
+     axis.text = element_text(size=10)
   ) +
   labs(
     title = "Convergence Check"
   )
 
-ggarrange(a1,a2,ncol=2,widths = c(1,2))
+#ggarrange(a1,a2,ncol=2,widths = c(1,2))
+
+#ggsave("Bayesian_check.png")
 
 
 ```
 
 
-In determining player performance relative to average, we created a "without defender" metrics, which show the probabilistic outcome of the play not accounting for a specific defender's involvement. The average difference between the MCMC mean and "without defender" metric helps to create our **Defending Plays Above Average (DPAA)** metric. *DPAA* shows the lift in probability a defensive player has on the outcome of a play. Any play with a *DPAA* greater than 0 can be defined as a positively defended play. 
+In determining player performance relative to the average, we created a "without defender" metric, which show the probabilistic outcome of the play not accounting for a specific defender's involvement or a normal intercept. The average difference between the MCMC mean and "without defender" metric helps to create our **Defending Plays Above Average (DPAA)** metric. *DPAA* shows the lift in probability a defensive player has on the outcome of a play. Any play with a *DPAA* greater than 0 can be defined as a positively defended play. 
 
-As a result, the model tends to identify Dump In/Outs as the event that has the highest probability of a positively defended event (e.g. Dump In/Outs resulting in a turnover). Takeaways and Puck Recoveries tend to be less positively defended which may be due to a secondary defender's ability to disrupt a play. Passes are one of the most difficult plays to defend given there is a higher probability of a pass being completed successfully than disrupted by a defender.  Given this information, we can also use the *DPAA* metric specific for passing plays as a way to identify those defenders who were especially effective in disrupting offensive movement during a power play. Shawn Ferris said that "We know that deploying better offensive players, [controlling more entries, and passing after those entries all lead to more shorthanded goals over time](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218)." Players with a reputation of defending the zone line ("blue line") and disrupting passing are more likely to be on the ice during shorthanded defensive play. 
+As a result, the model tends to identify Dump In/Outs as the event that has the highest probability of a positively defended event (e.g. Dump In/Outs resulting in a turnover). Takeaways and Puck Recoveries tend to be less positively defended which may be due to a secondary defender's ability to disrupt a play. Passes are one of the most difficult plays to defend given there is a higher probability of a pass being completed successfully than disrupted by a defender.  Given this information, we can also use the *DPAA* metric specifically for passing plays as a way to identify those defenders who were especially effective in disrupting offensive movement during a power play. Shawn Ferris said that "We know that deploying better offensive players, [controlling more entries, and passing after those entries all lead to more shorthanded goals over time](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218)." Players with a reputation of defending the zone line ("blue line") and disrupting passing are more likely to be on the ice during shorthanded defensive play. This also helps to show how proper defensive formations can reduce the performance of offensive passing in the offensive zone. 
 
 
 ```{r a4,echo=FALSE,fig.align='center'}
@@ -733,8 +758,9 @@ avg %>%
       subtitle = md("DPAA:  Defended Plays Above Average | Positively Defended Plays are DPAA > 0")
     ) %>%
   tab_source_note(
-    source_note = md("Play is a Passs")
-  )
+    source_note = md("Play is a Pass")
+  ) %>%
+  gtsave("DPAA_Event_Avg.png")
 
 
   
@@ -743,14 +769,13 @@ avg %>%
 
 
 ## Tournament Performance Analysis
-Using our model, we can evaluate the team performance during power plays as well as identify top and bottom individual performers as a way for teams to build a "penalty killer" shift. 
+Using our model, we can evaluate the 2022 Women's Hockey team performance during power plays as well as identify top and bottom individual performers as a way for teams to build a "penalty killer" shift. 
 
 ### Team Performance
-USA, Finland, and Russian Olympic Committee (ROC) were able to have a average DPAA rating greater than 0, largely due to their ability to defend passes. USA is interesting case study given their low amount of passes seen but saw the highest amount of Dump In/Out (18) and Puck Recoveries (36) relative to other countries. In fact, USA had a positive DPAA average during Puck Recoveries whereas Switzerland saw negative DPAA during Puck Recoveries. As we saw prior, the ability to defend against puck recoveries shows USA's ability to preemptively disrupt passes/shots. ROC had a high amount of passing plays defended but overall had the [lowest penalty killing rate](https://www.iihf.com/en/events/2022/olympic-w/teamstats/penaltykilling#statistics) and the highest amount power plays goals against in the tournament at 8. 
+USA, Finland, and Russian Olympic Committee (ROC) were able to have an average *DPAA* rating greater than 0, largely due to their ability to defend passes. USA is interesting case study given their low amount of passes seen but saw the highest amount of Dump In/Out (18) and Puck Recoveries (36) relative to other countries. In fact, USA had a positive *DPAA* average during Puck Recoveries whereas Switzerland saw negative *DPAA* during Puck Recoveries. As we saw prior, the ability to defend against puck recoveries shows USA's ability to preemptively disrupt passes/shots. USA also had closer separation to opposing players (14.95 ft of separation) compared to any other team. Finland had the highest separation from the players they were guarding (16.78 ft of separation) but the offensive team they were guarding were the most spread out and generally farthest from the net. In short, Finland's strategy was to space out the offense away from the net. ROC had a high amount of passing plays defended positively but overall had the [lowest penalty killing rate](https://www.iihf.com/en/events/2022/olympic-w/teamstats/penaltykilling#statistics) and the highest amount power plays goals against in the tournament at 8.
 
-Canada and Switzerland were the lowest performing teams in defending plays. Canada had 50% of their goals against during power plays despite having the [highest overall goal differential in the Olympics](https://www.iihf.com/en/events/2022/olympic-w/teamstats/goalkeeping#statistics). This is due to their inability to defend passes during penalty play situations. For example, the USA was able to out shoot Canada 53-27 in their first game yet Canada was able to able to win the game (which can attribute to excellent Canadian goaltending). Overall Canada had slighter higher quality (DPAA) of plays defended against compared to Switzerland. The reason for Switzerland having the lowest DPAA average was their inability to defend shots given they had the worst DPAA shot average and [2nd lowest penalty killing play](https://www.iihf.com/en/events/2022/olympic-w/teamstats/penaltykilling#statistics) during the tournament. 
+Canada and Switzerland were the lowest performing teams in defending plays. Canada had 50% of their goals against coming from power play goals despite having the [highest overall goal differential in the Olympics](https://www.iihf.com/en/events/2022/olympic-w/teamstats/goalkeeping#statistics). This is due to their inability to defend passes during penalty play situations leading to the highest average pass distance compared to other teams (i.e. offensive teams were able to spread the Canadian defense). For example, the USA was able to out shoot Canada 53-27 in their first game yet Canada was able to able to win the game, which can likely be attributed to excellent Canadian goaltending. Overall Canada had a slighter higher quality (*DPAA*) of plays defended against compared to Switzerland. The reason for Switzerland having the lowest *DPAA* average was their inability to defend shots given they had the worst *DPAA* shot average and [2nd lowest penalty killing play](https://www.iihf.com/en/events/2022/olympic-w/teamstats/penaltykilling#statistics) during the tournament. 
 
-**To-do: Add Separation**
 
 ```{r a5,echo=FALSE,warning=FALSE,message=FALSE,fig.align='center'}
 
@@ -859,13 +884,14 @@ team_function <- function(data, ...){
 
 
 play_plot_df %>%
-  team_function()
+  team_function() %>%
+  gtsave("Team_DPAA.png")
 
 
 ```
 
 
-Given the majority of the differences in DPAA were based on how well the team defends passing, the visual below identifies a team's approach or strategy to defending passes during penalty killing situation. We can see below that the USA tends to defend the blue line very well resulting in less passes in the offensive zone (with exception of top left side). To the contrary, most of Finland's great defensive play was in their zone whereas they tend to not perform well in the neutral zone. ROC is an interesting case study given that they are deploying a [diamond/box defensive formation](https://blueseatblogs.com/2011/10/24/penalty-kill/) and their defensive play appears to be inconsistent as passes through the formation haven't been defended well. In scouting Canada, they tend to allow a lot of passes into the offensive zone resulting in necessary above average defending in front of the net. Canada needs to replace the top end player in their diamond/box formation or get more aggressive with defending the blue line. 
+Given the majority of the differences in *DPAA* were based on how well the team defends passing, the visual below identifies a team's approach or strategy to defending passes during penalty killing situation. We can see below that the USA tends to defend the blue line very well resulting in less passes in the offensive zone (with exception of top left side). To the contrary, most of Finland's great defensive play was in their zone whereas they tend to not perform well in the neutral zone. ROC is an interesting case study given that they are deploying a [diamond/box defensive formation](https://blueseatblogs.com/2011/10/24/penalty-kill/) and their defensive play appears to be inconsistent as passes through the formation haven't been defended well. Ultimately, ROC's DPAA could have been a lot higher if there were able to defend against pass into their defensive formation. In scouting Canada, they tend to allow a lot of passes into the offensive zone resulting in necessary above average defending in front of the net. Canada needs to replace the top end player in their diamond/box formation or get more aggressive with defending the blue line. 
 
 
 ```{r a6,echo=FALSE,warning=FALSE,message=FALSE,fig.align='center'}
@@ -908,7 +934,6 @@ asp<-1.5
 ggplot(data = team_plot_df,aes(x_coord,y_coord)) +
   gg_rink(side="right") +
   stat_density_2d(aes(fill=DPAA_group),geom="polygon",size=5,alpha=0.5) +
-  #geom_density_2d(aes(alpha=..level..),color="light grey") +
   geom_point(aes(x=x_coord,y=y_coord),color="grey",alpha=.4) +
   ggimage::geom_image(aes(x=10,y=-25,image = flag_url),
                       size=.10,by="width",asp=asp) +
@@ -938,7 +963,7 @@ ggplot(data = team_plot_df,aes(x_coord,y_coord)) +
 
 
 
-
+#ggsave("Passing_Defense_Country.png")
 
 
 
@@ -948,7 +973,7 @@ ggplot(data = team_plot_df,aes(x_coord,y_coord)) +
 ### Individual Performance Analysis
 
 #### Top Performers
-To ensure proper scouting of individual performers, simulating the posteriors (using 10,000 iterations) helps to ensure the stability of the MCMC metrics. We can see that players from Finland and USA were the top performers (even after the simulated posteriors). One reason as to why is that these players tend to be closer to the player they are guarding than the average defender (15m) with the exception of Megan Keller. Megan Keller however was the best of these defenders in the tournament in defending against passes (at least 5 passes), which makes her valuable specialist to the USA team. Although Viivi Vainikka had the highest DPAA, this was due to a majority of her plays coming from successfully defending Dump Ins/Outs (easier plays to defend against). Ronja Savolainen guarded nearly 43 offensive players and had an impressive passing DPAA at 0.263. When simulating the posteriors (using 10,000 sims), we can see that she also had the lowest relative standard deviation to her simulated DPAA mean, which helps to show her consistent play for Finland and likely a big reason for their positive defense. The top 3 DPAA (MCMC) defenders for each country (7+ plays): 
+To ensure proper scouting of individual performers, simulating the posteriors (using 10,000 iterations) helps to ensure the stability of the MCMC metrics. We can see that players from Finland and USA were the top performers (even after the simulated posteriors). One reason is that these players tend to be closer to the player they are guarding than the average defender (+4ft vs average) with the exception of Megan Keller. Megan Keller was the best of these defenders in the tournament in defending against passes (at least 5 passes), which makes her a valuable specialist to the USA team. Although Viivi Vainikka had the highest *DPAA*, this was due to a majority of her plays coming from successfully defending Dump Ins/Outs (easier plays to defend against). Ronja Savolainen guarded nearly 43 offensive players and had an impressive passing *DPAA* at 0.263. When simulating the posteriors (using 10,000 sims), we can see that she also had the lowest relative standard deviation to her simulated *DPAA* mean, which helps to show her consistent play for Finland and likely a big reason for their positive defense. Here are the top 3 *DPAA* (MCMC mean) defenders for each country (7+ plays): 
 
 **Canada**: 
 
@@ -1055,14 +1080,14 @@ tab_function <- function(data, ...){
       headshot_url = "",
       flag_url = "",
       closest_defensive_player = "Player",
-      position = "Pos.",
+      position = "Position",
       chances = "Off. Players Guarding",
       n = "Plays",
       mcmc.mean = "DPAA",
-      mcmc.sd = "DPAA Sdev",
+      mcmc.sd = "DPAA SD",
       sim.mean = "DPAA Sim",
-      sim.sd = "DPAA Sim Sdev",
-      closest_opp_player_separation = "Avg. Defender Separation (m)",
+      sim.sd = "DPAA Sim SD",
+      closest_opp_player_separation = "Avg. Defender Separation (ft)",
       Pass = "Pass Plays",
       Pass_PDAA = "Pass DPAA"
     ) %>% 
@@ -1142,7 +1167,8 @@ a<-tab_data %>%
   slice(1:10) %>% 
   tab_function()
 
-a
+a %>%
+  gtsave("Top_Performers.png")
 
 
 
@@ -1151,7 +1177,7 @@ a
 
 #### Bottom Performers 
 
-The bottom individual performers were primarily from Canada and Switzerland with the exception of Susanna Tapani. Higher separation from the players guarding than average and total amount of players guarding (40 was 8th highest amount of players closest to) appear to be the top reason for Susanna's performance. This is interesting given Ronja had an opposite result and guarding a similar amount of players. The player that saw the most amount of defensive plays was Jocelyne Larocque and still was able to defend at a higher rate (-0.029) than several of her Canadian teammates. This is due to what was mentioned earlier in her play close to the net. Another observation is the ROC having only 1 negative DPAA despite overall inconsistent play. There overall defensive formation can be attributed as the reason their low penalty killing rate. 
+The bottom individual performers were primarily from Canada and Switzerland with the exception of Susanna Tapani from Finland. Higher separation from the players guarding (+4ft vs avg) and total amount of players guarding (40 was 8th highest amount of players closest to) appear to be the top reason for Susanna's performance. Her teammate Ronja Savolainen had guarded a similar amount of players but played closer to defenders on average and saw a better *DPAA* as a result. Alina Marti is another example of how spacing matters given she also had a higher separation and allowed her defenders to play at higher separation from all others on the ice thus translating to their ability to get open. Lastly, it is important to note that the ROC had only 1 negative *DPAA* player despite overall average team *DPAA* (near 0). This leads us to believe their overall defensive formation can be attributed as the reason for their low penalty killing rate. Here are the bottom 3 *DPAA* (MCMC mean) defenders for each country (7+ plays): 
 
 
 **Canada**: \
@@ -1190,8 +1216,7 @@ The bottom individual performers were primarily from Canada and Switzerland with
 
 *Not listing passing plays below, given a majority/all were passing plays*
 
-To do 
-*Add more observations*
+
 ```{r a8,echo=FALSE,message=FALSE,warning=FALSE,fig.align='center'}
 
 
@@ -1258,14 +1283,14 @@ bot_tab_function <- function(data, ...){
       headshot_url = "",
       flag_url = "",
       closest_defensive_player = "Player",
-      position = "Pos.",
+      position = "Position",
       chances = "Off. Players Guarding",
       n = "Passes",
       mcmc.mean = "DPAA",
-      mcmc.sd = "DPAA Sdev",
+      mcmc.sd = "DPAA SD",
       sim.mean = "DPAA Sim",
-      sim.sd = "DPAA Sim Sdev",
-      closest_opp_player_separation = "Avg. Defender Separation (m)"
+      sim.sd = "DPAA Sim SD",
+      closest_opp_player_separation = "Avg. Defender Separation (ft)"
     ) %>% 
     data_color(
       columns = vars(mcmc.mean),
@@ -1337,13 +1362,14 @@ bot_tab_function <- function(data, ...){
 
 
 bot_tab_data %>%
-bot_tab_function()
+bot_tab_function() %>%
+  gtsave("Bottom_perf.png")
 
 ```
 
 
 #### High Volume Performers
-Below shows a view of the 
+Below shows defenders with the highest amount of involvement and helps us to provide insights into the scheme assignment given out to shorthanded defenders. As we can see, most players are fitting into a diamond/box format given the concentration of defending plays made. The exception is Jocelyne Larocque (Canada) who has been defending the boards, which may have contributed to her below average play given she had to guard a wider zone. The same goes for Mich Zandee-Hart (Canada) who was stretched to play in three different parts of the diamond/box format. Canada may want to play into a tighter box/diamond format or have players play more disciplined to their zone assignment as a way to prevent and spread out passes for future games. Ronja Savolainen played mostly towards the blue line with some plays made in the neutral zone. The difference with her play versus Mich was that Ronja played at 13ft seperation vs Mich played at 21ft separation (nearly +6 vs avg). Jenni Hiirikoski, similar to Ronja Savolainen, also played 13ft to her defender and strictly to what appears to be an assigned zone. A defensive zone formation would helped to tighten average separation to the closest offensive player and increased positive defended plays as defenders would play to their assigned zone. 
 
 
 ```{r a9,echo=FALSE,message=FALSE,warning=FALSE,fig.align='center'}
@@ -1392,7 +1418,8 @@ plot_df<-pass.frame.sim.preds %>%
     defender_team == "Switzerland" ~ "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/170px-Flag_of_Switzerland.svg.png",
     defender_team == "Canada" ~ "https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Flag_of_Canada.svg/1200px-Flag_of_Canada.svg.png",
     TRUE ~ as.character(NA)
-  ))%>%
+  ),
+  y_coord = y_coord + 4) %>%
   arrange(match(closest_defensive_player,c( 
     "Jocelyne Larocque",
     "Sarah Forster",
@@ -1423,7 +1450,16 @@ new_plot$group<-factor(new_plot$closest_defensive_player,
     "Mich Zandee-Hart"
     ))
 
-
+new_plot<-new_plot %>%
+  mutate(group = case_when(
+    group == "Jocelyne Larocque" ~ "1. Jocelyne Larocque | DPAA: -0.029",
+    group == "Sarah Forster" ~ "2. Sarah Forster | DPAA: -0.090",
+    group == "Michelle Karvinen" ~ "3. Michelle Karvinen | DPAA: -0.022",
+    group == "Ronja Savolainen" ~ "4. Ronja Savolainen | DPAA: 0.264",
+    group == "Jenni Hiirikoski" ~ "5. Jenni Hiirikoski | DPAA: 0.119",
+    group == "Mich Zandee-Hart" ~ "6. Mich Zandee-Hart | DPAA: -0.148",
+    TRUE ~ as.character(NA)
+  ))
 
 #asp<-2.5
 
@@ -1431,16 +1467,14 @@ new_plot$group<-factor(new_plot$closest_defensive_player,
 asp<-1.5
 ggplot(data = new_plot,aes(x_coord,y_coord)) +
   gg_rink(side="right") +
-  stat_density_2d(aes(fill=DPAA_group,alpha=(..level..)^2),geom="polygon",size=3) +
-  geom_density_2d(aes(alpha=..level..),color="light grey") +
+  stat_density_2d(aes(fill=..level..,alpha=(..level..)^4),geom="polygon",size=1,show.legend = F) +
+  #geom_density_2d(aes(fill=..level..,alpha=..level..),color="light grey") +
   #geom_density_2d_filled(contour_var = "count") +
-  geom_point(aes(x=x_coord,y=y_coord),color="grey",alpha=.4) +
+  geom_point(aes(x=x_coord,y=y_coord,size=DPAA),alpha=.1) +
   ggimage::geom_image(aes(x=10,y=-25,image = flag_url),
                       size=.10,by="width",asp=asp) +
-  scale_fill_manual(values = c("red", "orange",
-                               "light blue", "blue",
-                               "green")) +
-  facet_wrap(~closest_defensive_player,ncol = 3) +
+  scale_fill_distiller(palette = 2,direction = 1) +
+  facet_wrap(~group,ncol = 3) +
     theme_void() +
     theme(panel.grid = element_blank(),
         axis.line = element_line(),
@@ -1450,12 +1484,12 @@ ggplot(data = new_plot,aes(x_coord,y_coord)) +
         plot.subtitle = element_text(hjust = .5,size=10,margin=margin(0,0,15,0)),
         legend.position = "top",
         panel.spacing.x = unit(1,"lines"),
-        legend.text = element_text(size=8)
+        legend.text = element_text(size=6),
+        plot.caption = element_text(size=7)
         ) +
   labs(x = "",
        y = "",
        title = "High Volume Defender Comparison",
-       subtitle = "Shows concentration of plays  made | DPAA ",
        legend = "DPAA",
        fill = "DPAA",
        caption = "These defenders were listed as the closest defensive player for the highest amount of plays") +
@@ -1471,35 +1505,28 @@ ggplot(data = new_plot,aes(x_coord,y_coord)) +
 
 
 ## Conclusion
+*DPAA* can be an effective metric to evaluate defensive plays during penalty situations. The direct application of *DPAA* can be used to evaluate overall team performance as well as isolating individual defenders who performed above/below expectations. An insight from the model was for defenders to aim to be within 15ft of the offensive players they are guarding. A zone assignment would install a system that ensures players are playing with 15ft of the nearest offensive player and prevent a player from getting open. Results from the model said that defending passes has the lowest probability of a positive defended play and DumpIn/Outs had the highest probability of a positive defended play. This is why taking the USA strategy of playing the blue line aggressively as a way to prevent passing plays from occurring is the optimal strategy. Ideally, the players at the top of the zone formation are your more athletic/quicker skaters to be able to reduce offensive separation, prevent zone entries and not be forced to guard many offensive players. 
 
---- List key action points and conclusion
---- List application to other aspects
+*DPAA* could be expanded to even strength situations given the proportion of passes but we would hypothesize that zone entry carries would likely play a greater role in the model (given less proportion of zone entries during power plays). The model would also need to be changed to take into account play situation given we would want to investigate even strength vs special teams play as a performance metric. I would want to build on *DPAA* to be the foundation to advance shorthanded defense evaluation by being the anchor metric in classifying different forechecking and in-zone formations.
 
-
+Lastly, I would like to thank Stathletes and the OTTHAC for facilitating and providing the data for the Big Data Cup. It is a privilege to be able to work with data like this and competitions such as this helps to advance the game as we know as well as develop skills of the analytics community. 
 
 
 
 ## References
+Brooks, D., Judge, J., Pavlidis, H. "Moving Beyond WOWY: A Mixed Approach To Measuring Catch Framing." Baseball Prospectus. February 5, 2015. https://www.baseballprospectus.com/news/article/25514/moving-beyond-wowy-a-mixed-approach-to-measuring-catcher-framing/
 
-https://www.baseballprospectus.com/leaderboards/catching/
-
-https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/
-
-https://www.baseballprospectus.com/news/article/25514/moving-beyond-wowy-a-mixed-approach-to-measuring-catcher-framing/
-
-http://mjskay.github.io/tidybayes/articles/tidy-rstanarm.html
-
-
-https://www.iihf.com/en/events/2022/olympic-w/schedule
-
-https://github.com/mtthwastn/statswithmatt/blob/master/hockey-with-r/gg-rink.R
-
-https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218
-
+Eisenberg, D., Raber, M. "Defensive Efficiency Metrics (DEMs): A Paradigm Shift in Defensive Hockey Analysis Based on Per-Possession Measurements." March 26, 2021. 
 https://www.statsportsconsulting.com/wp-content/uploads/Deffensive-Efficiency-Metrics-DEMs.pdf
 
-To Do 
--Find more defensive papers
+Ferris, Shawn. "Using Data To Inform Shorthanded Neutral Zone Decisions." Hockey-Graphs. April 16, 2020.
+https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218
+
+Judge, Jonathan. "Bayesian Bagging to Generate Uncertainty Intervals: A Catcher Framing Story." Baseball Prospectus. March 7, 2018. https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/
+
+Kay, Matthew. "Extracting and Visualizing Tidy Draws From Rstanarm Models". tidybayes. December 30, 2021. http://mjskay.github.io/tidybayes/articles/tidy-rstanarm.html
+
+
 
 
 

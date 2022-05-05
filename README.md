@@ -10,5 +10,3 @@ Eisenberg, D., Raber, M. “Defensive Efficiency Metrics (DEMs): A Paradigm Shif
 Ferris, Shawn. “Using Data To Inform Shorthanded Neutral Zone Decisions.” Hockey-Graphs. April 16, 2020. https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218
 Judge, Jonathan. “Bayesian Bagging to Generate Uncertainty Intervals: A Catcher Framing Story.” Baseball Prospectus. March 7, 2018. https://www.baseballprospectus.com/news/article/38289/bayesian-bagging-generate-uncertainty-intervals-catcher-framing-story/
 Kay, Matthew. “Extracting and Visualizing Tidy Draws From Rstanarm Models”. tidybayes. December 30, 2021. http://mjskay.github.io/tidybayes/articles/tidy-rstanarm.html
-![image](https://user-images.githubusercontent.com/20390351/166849151-ee28c646-5b4a-4228-bcb5-57696c66f6af.png)
-

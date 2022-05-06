@@ -28,6 +28,7 @@ library(rstanarm)
 library(ggimage)
 library(magick)
 library(ggpubr)
+library(gridExtra)
 
 ### final datasets
 defender.sim.mcmc<-read_csv("Summary/defender.sim.mcmc.csv") %>% dplyr::select(-`...1`)
@@ -712,6 +713,10 @@ avg<-pass.frame.sim.preds %>%
   dplyr::mutate(DPAA = fitted.values - wo_defender,   
                 Pos_DPAA = ifelse(DPAA > 0,playId,NA)) %>%
   dplyr::select(playId,x_coord,y_coord,x_coord_2,y_coord_2,DPAA,event,Pos_DPAA) %>%
+  mutate(event = case_when(
+    event == "Play" ~ "Pass",
+    TRUE ~ as.character(event)
+  )) %>%
   group_by(event) %>%
   summarize(
             `Event Count` = n_distinct(playId),
@@ -756,11 +761,14 @@ avg %>%
     tab_header(
       title = md("DPAA Avg by Event"),
       subtitle = md("DPAA:  Defended Plays Above Average | Positively Defended Plays are DPAA > 0")
-    ) %>%
-  tab_source_note(
-    source_note = md("Play is a Pass")
-  ) %>%
-  gtsave("DPAA_Event_Avg.png")
+    ) 
+#%>%
+#  tab_source_note(
+#    source_note = md("Play is a Pass")
+#  ) %>%
+  
+
+gtsave("DPAA_Event_Avg.png")
 
 
   
@@ -797,13 +805,13 @@ play_plot_df<-pass.frame.sim.preds %>%
     TRUE ~ as.character(NA)
   )) %>%
   group_by(defender_team,flag_url) %>%
-  summarize(
+  summarise(
     n = n_distinct(playId,na.rm = TRUE),
     power_plays = n_distinct(pp_index,na.rm = TRUE),
     total_pos = n_distinct(total_pos,na.rm = TRUE),
     play = n_distinct(play,na.rm = TRUE),
     pos_play = n_distinct(pos_play,na.rm = TRUE),
-    DPAA = round(as.numeric(as.character(mean(DPAA,na.rm = T))),3)) %>%
+    DPAA = round(as.numeric(as.character(mean(DPAA,na.rm = TRUE))),3)) %>%
   distinct() %>%
   ungroup() %>%
   mutate(
@@ -813,6 +821,16 @@ play_plot_df<-pass.frame.sim.preds %>%
   arrange(desc(DPAA)) %>%
   dplyr::select(defender_team,flag_url,DPAA,power_plays,n,DPAAPct,play,DPAA_Pass_Pct)
   
+sd<-pass.frame.sim.preds %>%
+  mutate(DPAA = fitted.values - wo_defender) %>%
+  group_by(defender_team) %>%
+  summarize(sd = round(sd(DPAA),3))
+
+play_plot_df<-play_plot_df %>%
+  left_join(sd,by=c("defender_team")) %>%
+  dplyr::select(defender_team,flag_url,DPAA,sd,power_plays,n,DPAAPct,play,DPAA_Pass_Pct)
+
+
 ####### create GT Table
 team_function <- function(data, ...){
   data %>% 
@@ -838,6 +856,7 @@ team_function <- function(data, ...){
       DPAAPct = "Positive Defended Plays %",
       play = "Passes",
       DPAA = "DPAA",
+      sd = "DPAA SD",
       DPAA_Pass_Pct = "Positive Defended Passing Plays %"
     ) %>% 
    data_color(
@@ -884,8 +903,10 @@ team_function <- function(data, ...){
 
 
 play_plot_df %>%
-  team_function() %>%
-  gtsave("Team_DPAA.png")
+  team_function() 
+
+#%>%
+#  gtsave("Team_DPAA.png")
 
 
 ```
@@ -1167,8 +1188,10 @@ a<-tab_data %>%
   slice(1:10) %>% 
   tab_function()
 
-a %>%
-  gtsave("Top_Performers.png")
+a 
+
+#%>%
+#  gtsave("Top_Performers.png")
 
 
 
@@ -1362,8 +1385,10 @@ bot_tab_function <- function(data, ...){
 
 
 bot_tab_data %>%
-bot_tab_function() %>%
-  gtsave("Bottom_perf.png")
+bot_tab_function() 
+
+#%>%
+#  gtsave("Bottom_perf.png")
 
 ```
 
@@ -1526,7 +1551,192 @@ Judge, Jonathan. "Bayesian Bagging to Generate Uncertainty Intervals: A Catcher 
 
 Kay, Matthew. "Extracting and Visualizing Tidy Draws From Rstanarm Models". tidybayes. December 30, 2021. http://mjskay.github.io/tidybayes/articles/tidy-rstanarm.html
 
+```{r a10,echo=FALSE,message=FALSE,warning=FALSE}
 
+name<-"Sarah Nurse"
+title<-"'s DPAA Performance"
+headshot_url<-"http://d2a3o6pzho379u.cloudfront.net/136867.jpg"
+plyr<-paste(name,title,sep="")
+
+card_plot_df<-pass.frame.sim.preds %>%
+  dplyr::filter(closest_defensive_player %in%
+    name
+  ) %>%
+  dplyr::mutate(DPAA = fitted.values - wo_defender) %>%
+  dplyr::select(playId,closest_defensive_player,x_coord,y_coord,x_coord_2,y_coord_2,DPAA,event,event_successful,defender_team) %>%
+  group_by(playId,closest_defensive_player,event,event_successful,defender_team) %>%
+  summarize(x_coord = mean(x_coord,na.rm = T),
+            y_coord = mean(y_coord,na.rm = T),
+            x_coord = ifelse(x_coord > 100,200-x_coord,x_coord),
+            y_coord = y_coord - 45,
+            x_coord = ifelse(x_coord > 90,x_coord - 5,x_coord),
+            y_coord = ifelse(y_coord > 30,y_coord - 5,y_coord),
+            DPAA = as.numeric(as.character(mean(DPAA,na.rm = T)))) %>%
+  distinct() %>%
+  ungroup() %>%
+  mutate(DPAA_group = case_when(
+    DPAA > 0.2 ~ "A. Excellent (0.2+)",
+    DPAA <= 0.2 & DPAA > 0 ~ "B. Above Average (0 to 0.2)",
+    DPAA < 0 & DPAA >= -0.2 ~ "C. Below Average (-0.2 to 0)",
+    DPAA < -0.2 ~ "D. Poor (-0.2 or less)",
+    TRUE ~ as.character(NA)
+    ),
+    headshot_url = "http://d2a3o6pzho379u.cloudfront.net/136867.jpg",
+  flag_url = case_when(
+    defender_team == "USA" ~ "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png",
+    defender_team == "Finland" ~ "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Finland.svg/640px-Flag_of_Finland.svg.png",
+    defender_team == "ROC" ~ "https://stillmed.olympics.com/media/Images/OlympicOrg/Countries/R/Russian_Federation/CNO-RUS.jpg",
+    defender_team == "Switzerland" ~ "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/170px-Flag_of_Switzerland.svg.png",
+    defender_team == "Canada" ~ "https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Flag_of_Canada.svg/1200px-Flag_of_Canada.svg.png",
+    TRUE ~ as.character(NA)
+  ),
+  y_coord = y_coord + 4) %>%
+  arrange(match(closest_defensive_player,c( 
+    "Sarah Nurse"
+    )))
+  
+neworder<-c(     
+"Sarah Nurse"
+  )
+#img_AV<-readPNG(getURLContent('https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Finland.svg/640px-Flag_of_Finland.svg.png'))
+
+new_plot<-card_plot_df
+new_plot$group<-factor(new_plot$closest_defensive_player,
+                       levels=c(    
+    "Sarah Nurse"
+    ))
+
+#asp<-2.5
+
+
+g1<-new_plot %>%
+  group_by(event) %>%
+  summarize(DPAA = round(mean(DPAA),3),
+            Val = n()) %>%
+  ggplot() +
+  aes(x=event,y=DPAA) +
+  geom_bar(stat="identity",fill="red") +
+  geom_text(aes(label=DPAA), vjust=-0.9, hjust=-1.5,color="white", size=3.5) +
+  geom_text(aes(label=Val), vjust=-0.9, hjust='bottom',color="white", size=3.5) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    y="",
+    title = "DPAA by Event"
+  ) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    plot.title = element_text(size=10,margin=margin(5,0,10,0))
+  )
+
+
+
+
+player_comp<-pass.frame.sim.preds %>%
+  mutate(Comparison = ifelse(closest_defensive_player == name,name,"All Other"))
+
+g2<-player_comp %>%
+  dplyr::mutate(DPAA = fitted.values - wo_defender) %>%
+  filter(Comparison != "NA") %>%
+ggplot() +
+  aes(x=DPAA,fill=Comparison) +
+        geom_density(alpha=0.6) +
+  scale_fill_manual(
+    values = c(
+      'grey','red'
+    )
+  ) +
+  theme_minimal() + 
+      theme(panel.grid = element_blank(),
+        axis.line = element_line(),
+        plot.title = element_text(hjust = .5,size=10,margin=margin(5,0,10,0)),
+        plot.subtitle = element_text(hjust = .5,size=10,margin=margin(0,0,15,0)),
+        legend.position = "top",
+        panel.spacing.x = unit(1,"lines"),
+        legend.text = element_text(size=6),
+        plot.caption = element_text(size=7),
+        legend.title = element_text(size=7)
+        ) +
+  labs(title = "DPAA Comparison",
+       y="")
+
+g3<-player_comp %>%
+  dplyr::mutate(DPAA = fitted.values - wo_defender) %>%
+  filter(Comparison != "NA") %>%
+ggplot() +
+  aes(x=fitted.values,fill=Comparison) +
+        geom_density(alpha=0.6) +
+  scale_fill_manual(
+    values = c(
+      'grey','red'
+    )
+  ) +
+  theme_minimal() + 
+      theme(panel.grid = element_blank(),
+        axis.line = element_line(),
+        plot.title = element_text(hjust = .5,size=10,margin=margin(5,0,10,0)),
+        plot.subtitle = element_text(hjust = .5,size=10,margin=margin(0,0,15,0)),
+        legend.position = "top",
+        panel.spacing.x = unit(1,"lines"),
+        legend.text = element_text(size=6),
+        plot.caption = element_text(size=7),
+        legend.title = element_text(size=7)
+        ) +
+  labs(title = "Play Exp. Outcome Comparison",
+       x = "W/O Defender Exp. Outcome",
+       y="")
+  
+
+
+#new_plot %>%
+asp<-1.5
+g4<-ggplot(data = new_plot,aes(x_coord,y_coord)) +
+  gg_rink(side="right") +
+  stat_density_2d(aes(fill=..level..,alpha=(..level..)^4),geom="polygon",size=1,show.legend = F) +
+  #geom_density_2d(aes(fill=..level..,alpha=..level..),color="light grey") +
+  #geom_density_2d_filled(contour_var = "count") +
+  geom_point(aes(x=x_coord,y=y_coord,size=DPAA),alpha=.1) +
+  ggimage::geom_image(aes(x=10,y=-25,image = flag_url),
+                      size=.10,by="width",asp=asp) +
+  ggimage::geom_image(aes(x=10,y=30,image=headshot_url),
+                      size=.10,by="width",asp=asp) +
+  scale_fill_distiller(palette = 8,direction = 1) +
+    theme_void() +
+    theme(panel.grid = element_blank(),
+        axis.line = element_line(),
+        axis.ticks=  element_blank(),
+        axis.text = element_blank(),
+        plot.title = element_text(hjust = .5,size=10,margin=margin(5,0,10,0)),
+        plot.subtitle = element_text(hjust = .5,size=10,margin=margin(0,0,15,0)),
+        legend.position = "none",
+        panel.spacing.x = unit(1,"lines"),
+        legend.text = element_text(size=6),
+        plot.caption = element_text(size=7)
+        ) +
+  labs(x = "",
+       y = "",
+       title = "DPAA Play Location",
+       legend = "DPAA",
+       fill = "DPAA") +
+  guides(alpha = "none",
+         color = guide_legend(override.aes = list(fill = NA)))
+
+
+
+top_row<-ggarrange(g1,g2,g3,ncol=3)
+bottom_row<-ggarrange(NULL,g4,NULL,ncol=3,widths = c(1,2,1))
+figure<-ggarrange(top_row,bottom_row,ncol=1)
+
+annotate_figure(figure,
+                top = text_grob(plyr, color = "red", face = "bold", size = 14),
+                bottom = text_grob("Data source: \n Stathletes", color = "black",
+                                   hjust = 1, x = 1, face = "italic", size = 10)
+                )
+
+
+```
 
 
 

@@ -1,4 +1,6 @@
 # BDC22
 Big Data Cup 22
 
-Paper Preview: 
+PDF file contains final paper. 
+
+Data comes from: https://github.com/bigdatacup/Big-Data-Cup-2021

@@ -82,8 +82,9 @@ I would like to thanks Stathletes and the OTTHAC for hosting the Big Data Cup an
 
 Sample Scouting Reports: https://github.com/qmaclean/BDC22/tree/main/DPAA%20Scouting%20Reports
 
-Sarah Nurse (example): 
-<img src="https://github.com/qmaclean/BDC22/blob/main/DPAA%20Scouting%20Reports/Sarah%20Nurse_DPAA.png" width="75%" />
+**Sarah Nurse (example):**
+
+<img src="https://github.com/qmaclean/BDC22/blob/main/DPAA%20Scouting%20Reports/Sarah%20Nurse_DPAA.png" width="100%" />
 
 
 

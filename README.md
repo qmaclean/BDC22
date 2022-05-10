@@ -36,6 +36,46 @@ Canada and Switzerland were the lowest performing teams in defending plays. Cana
 
 <img width="374" alt="image" src="https://user-images.githubusercontent.com/20390351/167528420-2da026f1-38d9-4240-9d21-4f0232433b16.png">
 
+### Individual Performacne Analysis
+
+#### Top Performers
+To ensure proper scouting of individual performers, simulating the posteriors (using 10,000 iterations) helps to ensure the stability of the MCMC metrics (sim mean). We can see that players from Finland and USA were the top performers. One reason is that these players tend to be closer to the player they are guarding than the average defender (+4ft vs avg) with the exception of Megan Keller. Megan Keller was the best of these defenders in the tournament in defending against passes (at least 5 passes), which makes her a valuable specialist to the USA team. Although Viivi Vainikka had the highest DPAA, this was due to a majority of her plays coming from successfully defending Dump Ins/Outs (easier plays to defend against). Ronja Savolainen guarded nearly 43 offensive players and had an impressive passing DPAA at 0.263.
+
+<img width="463" alt="image" src="https://user-images.githubusercontent.com/20390351/167528700-47219195-7f13-4483-bf1d-be3f1876e3f6.png">
+
+When simulating the posteriors (using 10,000 sims), we can see that she also had the lowest relative standard deviation to her simulated DPAA mean, which helps to show her consistent play for Finland and likely a big reason for their positive overall defense given their high team standard deviation. Here are the top 3 DPAA (MCMC mean) defenders for each country (7+ plays): \
+
+•	Canada: Marie-Philip Poulin (0.175),  Blayre Turnbull (0.131),  Brianne Jenner (-0.009)
+•	Finland: Viivi Vainikka (0.488), Minnamari Tuominen (0.472), Ronja Savolainen (0.264)
+•	ROC: Oxana Bratishcheva (0.173), Nina Pirogova (0.108), Olga Sosina (0.068)
+•	Switzerland: Phoebe Staenz (0.075), Noemi Ryhner (0.023), Lara Stalder (-0.031)
+•	USA: Megan Keller (0.477), Abby Roque (0.375), Amanda Kessel (0.203)
+
+#### Bottom Performers
+The bottom individual performers were primarily from Canada and Switzerland with the exception of Susanna Tapani from Finland. Higher separation from the players guarding (+4ft vs avg) and total amount of players guarding (40 was 8th highest number of players closest to) appear to be the top reason for Susanna’s performance. Her teammate Ronja Savolainen had guarded a similar number of players but played closer to defenders on average and saw a better DPAA as a result. Given Canada and Switzerland’s low team standard deviation, the bottom performers listed here are more likely a function of their team’s defensive formation than their individual play. Lastly, it is important to note that the ROC had only 1 negative DPAA player despite overall average team DPAA (near 0). This leads us to believe their overall defensive formation can be attributed as the reason for their low penalty killing rate. Here are the bottom 3 DPAA (MCMC mean) defenders for each country (7+ plays):
+•	Canada: Rebecca Johnston (-0.219), Natalie Spooner (-0.187), Mich Zandee-Hart (-0.148)
+•	Finland: Susanna Tapani (-0.227), Sini Karjalainen (-0.199), Ella Viitasuo (-0.040)
+•	ROC: Fanuza Kadirova (-0.088), Maria Batalova (0.014), Angelina Goncharenko (0.017)
+•	Switzerland: Lara Christen ( -0.226), Nicole Vallario (-0.225), Alina Marti (-0.218)
+•	USA: Alex Carpenter (-0.143), Lee Stecklein (-0.060), Dani Cameranesi (0.003)
+
+<img width="453" alt="image" src="https://user-images.githubusercontent.com/20390351/167528848-c2f318ab-9917-4864-b260-8c81f4bcbb40.png">
+
+#### High Volume Performers
+Below shows defenders with the highest amount of involvement and helps us to provide insights into the scheme assignment given out to shorthanded defenders. As we can see, most players are fitting into a diamond/box format given the concentration of defending plays made. The exception is Jocelyne Larocque (Canada) who has been defending the boards, which may have contributed to her below average play given she had to guard a wider zone. The same goes for Mich Zandee-Hart (Canada) who was stretched to play in three different parts of the diamond/box format. Canada may want to play into a tighter box/diamond format or have players play more disciplined to their zone assignment as a way to prevent and spread out passes for future games. Ronja Savolainen played mostly towards the blue line with some plays made in the neutral zone. The difference with her play versus Mich was that Ronja played at 13ft separation vs Mich played at 21ft separation (nearly +6 vs avg). Jenni Hiirikoski, similar to Ronja Savolainen, also played 13ft to her defender and strictly to what appears to be an assigned zone. Jenni Hiirikoski, similar to Ronja Savolainen, also played 13ft to her defender and strictly to what appears to be an assigned zone. A rigid defensive zone formation would help to tighten average separation to the closest offensive player and increased positive defended plays as defenders would play to their assigned zone.
+
+<img width="315" alt="image" src="https://user-images.githubusercontent.com/20390351/167528924-e58437c9-45e9-4114-8e80-f94b730aab42.png">
+
+
+### Conclusion
+DPAA can be a tool to evaluate defensive play during penalty situations. The direct application of DPAA can be used to evaluate if overall team performance comes from excellent individual performance or a function of a poor defensive formation. One insight from the model was for defenders to aim to be within 15ft of the offensive players they are guarding. A zone assignment would install a system that ensures players are playing within 15ft of the nearest offensive player and prevent a player from being effective. Results from the model said that defending passes has the lowest probability of a positively defended play and DumpIn/Outs had the highest probability of a positively defended play. This is why taking the USA strategy of playing the blue line aggressively as a way to prevent passing plays in the offensive zone from occurring is the optimal strategy. Ideally, the players at the top of the box/diamond zone formation are your more athletic/quicker skaters that can be able to reduce offensive separation and your remaining defenders can play a tighter portion of the box/diamond to prevent play in front of the net. DPAA would be an effective tool to identify those defenders who can play at the top of the box/diamond formation. One way of monitoring individual defender’s performance is within the linked [sample scouting reports,](https://github.com/qmaclean/BDC22/tree/main/DPAA Scouting Reports) which uses DPAA to measure a player’s performance relative to all others. 
+
+DPAA could be expanded to even strength situations given the proportion of passes but we would hypothesize that zone entry carries would likely play a greater role in the model (given less proportion of zone entries during power plays). The model would also need to be changed to take into account play situation given we would want to investigate even strength vs special teams play as a performance metric. I would want use DPAA to further classify different optimal forechecking and in-zone formations to improve team defensive formation strategies.
+I would like to thanks Stathletes and the OTTHAC for hosting the Big Data Cup and providing the data for advancing the use of analytics in women’s hockey. Also, a special thanks to Josh Pohlkamp-Hartt from the Boston Bruins for providing perspective into shorthanded play/strategies.
+
+
+
+
 
 
 

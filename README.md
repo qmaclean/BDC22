@@ -70,7 +70,7 @@ The bottom individual performers were primarily from Canada and Switzerland with
 #### High Volume Performers
 Below shows defenders with the highest amount of involvement and helps us to provide insights into the scheme assignment given out to shorthanded defenders. As we can see, most players are fitting into a diamond/box format given the concentration of defending plays made. The exception is Jocelyne Larocque (Canada) who has been defending the boards, which may have contributed to her below average play given she had to guard a wider zone. The same goes for Mich Zandee-Hart (Canada) who was stretched to play in three different parts of the diamond/box format. Canada may want to play into a tighter box/diamond format or have players play more disciplined to their zone assignment as a way to prevent and spread out passes for future games. Ronja Savolainen played mostly towards the blue line with some plays made in the neutral zone. The difference with her play versus Mich was that Ronja played at 13ft separation vs Mich played at 21ft separation (nearly +6 vs avg). Jenni Hiirikoski, similar to Ronja Savolainen, also played 13ft to her defender and strictly to what appears to be an assigned zone. Jenni Hiirikoski, similar to Ronja Savolainen, also played 13ft to her defender and strictly to what appears to be an assigned zone. A rigid defensive zone formation would help to tighten average separation to the closest offensive player and increased positive defended plays as defenders would play to their assigned zone.
 
-<img src="https://github.com/qmaclean/BDC22/blob/main/Viz/HighVolume.png" width="50%" />
+<img src="https://github.com/qmaclean/BDC22/blob/main/Viz/HighVolume.png" width="75%" />
 
 
 ### Conclusion

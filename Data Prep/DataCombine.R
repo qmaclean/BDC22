@@ -5,7 +5,7 @@ library(tidyverse)
 library(purrr)
 library(gifski)
 library(gganimate) 
-
+library(RCurl)
 
 ### load data ####
 getwd()
@@ -111,27 +111,28 @@ FPS<-1/30
 ### iterate through to combine data
 ######### GM1 CAN vs USA ################
 # GM1_PP1
-CAN_USA_PP1<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P1 PP1.csv")
+
+CAN_USA_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P1 PP1.csv")
 CAN_USA_PP1$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP1$penalty<-1
 # GM1_PP2
-CAN_USA_PP2<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P1 PP2.csv")
+CAN_USA_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P1 PP2.csv")
 CAN_USA_PP2$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP2$penalty<-2
 # GM1_PP3
-CAN_USA_PP3<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P2 PP3.csv")
+CAN_USA_PP3<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P2 PP3.csv")
 CAN_USA_PP3$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP3$penalty<-3
 # GM1_PP4
-CAN_USA_PP4<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P2 PP5.csv")
+CAN_USA_PP4<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P2 PP5.csv")
 CAN_USA_PP4$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP4$penalty<-5
 # GM1_PP5
-CAN_USA_PP5<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P3 PP6.csv")
+CAN_USA_PP5<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P3 PP6.csv")
 CAN_USA_PP5$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP5$penalty<-6
 # GM1_PP6
-CAN_USA_PP6<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA P3 PP7.csv")
+CAN_USA_PP6<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA P3 PP7.csv")
 CAN_USA_PP6$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP6$penalty<-7
 
@@ -162,7 +163,7 @@ CAN_USA_PP6_vsi$game_name<-"2022-02-08 Canada at USA"
 CAN_USA_PP6_vsi$penalty<-7
 
 ## roster tracking
-CAN_USA_roster<-read_csv("Src/TrackingData/2022-02-08 Canada at USA/2022-02-08 Canada at USA roster.csv")
+CAN_USA_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 Canada at USA/2022-02-08 Canada at USA roster.csv")
 
 #### fix roster 
 ### join on frame_id & period? 
@@ -434,13 +435,13 @@ CAN_USA_FINAL<-CAN_USA_FINAL %>%
   left_join(CAN_USA_roster,by=c("jn","team"))
 
 
-missing_players_CAN_USA_FINAL<-CAN_USA_FINAL %>%
+#missing_players_CAN_USA_FINAL<-CAN_USA_FINAL %>%
   #dplyr::filter(!complete.cases(player)) %>%
-  group_by(jn,team_name,player,position) %>%
-  summarize(n = n())
+#  group_by(jn,team_name,player,position) %>%
+#  summarize(n = n())
 
-CAN_USA_roster_mis<-CAN_USA_roster %>%
-  left_join(missing_players_CAN_USA_FINAL,by=c("player"))
+#CAN_USA_roster_mis<-CAN_USA_roster %>%
+#  left_join(missing_players_CAN_USA_FINAL,by=c("player"))
 
 
 
@@ -466,27 +467,27 @@ rm(CAN_USA_roster)
 
 ######################### GAME2 ROC @ Finland ###
 # GM2_PP1
-ROC_FIN_PP1<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P1 PP1.csv")
+ROC_FIN_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P1 PP1.csv")
 ROC_FIN_PP1$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP1$penalty<-1
 # GM2_PP2
-ROC_FIN_PP2<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP2.csv")
+ROC_FIN_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP2.csv")
 ROC_FIN_PP2$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP2$penalty<-2
-# GM2_PP3
-ROC_FIN_PP3<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP3.csv")
-ROC_FIN_PP3$game_name<-"2022-02-08 ROC at Finland"
-ROC_FIN_PP3$penalty<-3
-# GM2_PP4
-ROC_FIN_PP4<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP4.csv")
-ROC_FIN_PP4$game_name<-"2022-02-08 ROC at Finland"
-ROC_FIN_PP4$penalty<-4
+# GM2_PP3  -> deleted in bucketless
+#ROC_FIN_PP3<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP3.csv")
+#ROC_FIN_PP3$game_name<-"2022-02-08 ROC at Finland"
+#ROC_FIN_PP3$penalty<-3
+# GM2_PP4  -> deleted in bucketless data
+#ROC_FIN_PP4<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP4.csv")
+#ROC_FIN_PP4$game_name<-"2022-02-08 ROC at Finland"
+#ROC_FIN_PP4$penalty<-4
 # GM2_PP5
-ROC_FIN_PP5<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP5.csv")
+ROC_FIN_PP5<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P2 PP5.csv")
 ROC_FIN_PP5$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP5$penalty<-5
 # GM2_PP5
-ROC_FIN_PP6<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P3 PP6.csv")
+ROC_FIN_PP6<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland P3 PP6.csv")
 ROC_FIN_PP6$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP6$penalty<-6
 
@@ -500,13 +501,13 @@ ROC_FIN_PP2_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShots
 ROC_FIN_PP2_vsi$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP2_vsi$penalty<-2
 # Game 3
-ROC_FIN_PP3_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShotsInfo_2022-02-08 ROC at Finland P2 PP3.csv")
-ROC_FIN_PP3_vsi$game_name<-"2022-02-08 ROC at Finland"
-ROC_FIN_PP3_vsi$penalty<-3
+#ROC_FIN_PP3_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShotsInfo_2022-02-08 ROC at Finland P2 PP3.csv")
+#ROC_FIN_PP3_vsi$game_name<-"2022-02-08 ROC at Finland"
+#ROC_FIN_PP3_vsi$penalty<-3
 # Game 4
-ROC_FIN_PP4_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShotsInfo_2022-02-08 ROC at Finland P2 PP4.csv")
-ROC_FIN_PP4_vsi$game_name<-"2022-02-08 ROC at Finland"
-ROC_FIN_PP4_vsi$penalty<-4
+#ROC_FIN_PP4_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShotsInfo_2022-02-08 ROC at Finland P2 PP4.csv")
+#ROC_FIN_PP4_vsi$game_name<-"2022-02-08 ROC at Finland"
+#ROC_FIN_PP4_vsi$penalty<-4
 # Game 5
 ROC_FIN_PP5_vsi<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/videoShotsInfo_2022-02-08 ROC at Finland P2 PP5.csv")
 ROC_FIN_PP5_vsi$game_name<-"2022-02-08 ROC at Finland"
@@ -517,7 +518,7 @@ ROC_FIN_PP6_vsi$game_name<-"2022-02-08 ROC at Finland"
 ROC_FIN_PP6_vsi$penalty<-6
 
 ## roster tracking
-ROC_FIN_roster<-read_csv("Src/TrackingData/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland roster.csv")
+ROC_FIN_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-08 ROC at Finland/2022-02-08 ROC at Finland roster.csv")
 
 
 ##### TRANSFORM & JOIN VIDEO FILES ######
@@ -608,86 +609,86 @@ rm(ROC_FIN_PP2_vsi)
 rm(v2)
 
 # PP3
-v3<-ROC_FIN_PP3_vsi %>%
-  mutate(diff = frame_end_shot - frame_start_shot) %>%
-  group_by(shot_ind) %>%
-  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
-                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
+#v3<-ROC_FIN_PP3_vsi %>%
+#  mutate(diff = frame_end_shot - frame_start_shot) %>%
+#  group_by(shot_ind) %>%
+#  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
+#                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
 
-ROC_FIN_PP3<-ROC_FIN_PP3 %>%
-  left_join(v3,by=c("frame_id"))
+#ROC_FIN_PP3<-ROC_FIN_PP3 %>%
+#  left_join(v3,by=c("frame_id"))
 
-ROC_FIN_PP3<-ROC_FIN_PP3 %>%
-  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
-  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
-         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
-  left_join(ROC_FIN_PP3_vsi,by = c("game_name","penalty","shot_ind")) %>%
-  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
+#ROC_FIN_PP3<-ROC_FIN_PP3 %>%
+#  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
+#  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
+#         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
+#  left_join(ROC_FIN_PP3_vsi,by = c("game_name","penalty","shot_ind")) %>%
+#  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
 
-ROC_FIN_PP3<-ROC_FIN_PP3 %>%
-  left_join(pxp_womens_pp,by=c("game_name"="game_name",
-                               "penalty" = "penalty_number",
-                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
+#ROC_FIN_PP3<-ROC_FIN_PP3 %>%
+#  left_join(pxp_womens_pp,by=c("game_name"="game_name",
+#                               "penalty" = "penalty_number",
+#                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
 
-ROC_FIN_PP3<-ROC_FIN_PP3 %>%
-  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
-                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
-                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
-  dplyr::rename(period = period.x,
-                team_name = team_name.x,
-                start_video_clock_seconds = start_video_clock_seconds.x,
-                end_video_clock_seconds = end_video_clock_seconds.x,
-                start_period = start_period.x,
-                end_period = end_period.x,
-                start_game_clock_seconds = start_game_clock_seconds.x,
-                end_game_clock_seconds = end_game_clock_seconds.x,
-                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
-                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
-  )
+#ROC_FIN_PP3<-ROC_FIN_PP3 %>%
+#  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
+#                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
+#                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
+#  dplyr::rename(period = period.x,
+#                team_name = team_name.x,
+#                start_video_clock_seconds = start_video_clock_seconds.x,
+#                end_video_clock_seconds = end_video_clock_seconds.x,
+#                start_period = start_period.x,
+#                end_period = end_period.x,
+#                start_game_clock_seconds = start_game_clock_seconds.x,
+#                end_game_clock_seconds = end_game_clock_seconds.x,
+#                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
+#                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
+#  )
 
-rm(ROC_FIN_PP3_vsi)
-rm(v3)
+#rm(ROC_FIN_PP3_vsi)
+#rm(v3)
 
 # PP4 
-v4<-ROC_FIN_PP4_vsi %>%
-  mutate(diff = frame_end_shot - frame_start_shot) %>%
-  group_by(shot_ind) %>%
-  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
-                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
+#v4<-ROC_FIN_PP4_vsi %>%
+#  mutate(diff = frame_end_shot - frame_start_shot) %>%
+#  group_by(shot_ind) %>%
+#  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
+#                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
 
-ROC_FIN_PP4<-ROC_FIN_PP4 %>%
-  left_join(v4,by=c("frame_id"))
+#ROC_FIN_PP4<-ROC_FIN_PP4 %>%
+#  left_join(v4,by=c("frame_id"))
 
-ROC_FIN_PP4<-ROC_FIN_PP4 %>%
-  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
-  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
-         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
-  left_join(ROC_FIN_PP4_vsi,by = c("game_name","penalty","shot_ind")) %>%
-  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
+#ROC_FIN_PP4<-ROC_FIN_PP4 %>%
+#  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
+#  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
+#         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
+#  left_join(ROC_FIN_PP4_vsi,by = c("game_name","penalty","shot_ind")) %>%
+#  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
 
-ROC_FIN_PP4<-ROC_FIN_PP4 %>%
-  left_join(pxp_womens_pp,by=c("game_name"="game_name",
-                               "penalty" = "penalty_number",
-                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
+#ROC_FIN_PP4<-ROC_FIN_PP4 %>%
+#  left_join(pxp_womens_pp,by=c("game_name"="game_name",
+#                               "penalty" = "penalty_number",
+#                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
 
-ROC_FIN_PP4<-ROC_FIN_PP4 %>%
-  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
-                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
-                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
-  dplyr::rename(period = period.x,
-                team_name = team_name.x,
-                start_video_clock_seconds = start_video_clock_seconds.x,
-                end_video_clock_seconds = end_video_clock_seconds.x,
-                start_period = start_period.x,
-                end_period = end_period.x,
-                start_game_clock_seconds = start_game_clock_seconds.x,
-                end_game_clock_seconds = end_game_clock_seconds.x,
-                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
-                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
-  )
+#ROC_FIN_PP4<-ROC_FIN_PP4 %>%
+#  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
+#                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
+#                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
+#  dplyr::rename(period = period.x,
+#                team_name = team_name.x,
+#                start_video_clock_seconds = start_video_clock_seconds.x,
+#                end_video_clock_seconds = end_video_clock_seconds.x,
+#                start_period = start_period.x,
+#                end_period = end_period.x,
+#                start_game_clock_seconds = start_game_clock_seconds.x,
+#                end_game_clock_seconds = end_game_clock_seconds.x,
+#                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
+#                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
+#  )
 
-rm(ROC_FIN_PP4_vsi)
-rm(v4)
+#rm(ROC_FIN_PP4_vsi)
+#rm(v4)
 
 # PP5
 v5<-ROC_FIN_PP5_vsi %>%
@@ -772,7 +773,7 @@ rm(ROC_FIN_PP6_vsi)
 rm(v6)
 
 #### join to rosters ###
-ROC_FIN_FINAL<-rbind(ROC_FIN_PP1,ROC_FIN_PP2,ROC_FIN_PP3,ROC_FIN_PP4,ROC_FIN_PP5,ROC_FIN_PP6)
+ROC_FIN_FINAL<-rbind(ROC_FIN_PP1,ROC_FIN_PP2,ROC_FIN_PP5,ROC_FIN_PP6)
 
 
 ROC_FIN_FINAL<-ROC_FIN_FINAL %>%
@@ -784,27 +785,27 @@ write.csv(ROC_FIN_FINAL,"DataTransform/TrackingMerge/ROC_FIN_FINAL.csv")
 
 rm(ROC_FIN_PP1)
 rm(ROC_FIN_PP2)
-rm(ROC_FIN_PP3)
-rm(ROC_FIN_PP4)
+#rm(ROC_FIN_PP3)
+#rm(ROC_FIN_PP4)
 rm(ROC_FIN_PP5)
 rm(ROC_FIN_PP6)
 rm(ROC_FIN_roster)
 
 ##### GM 3 SWISS @ ROC ######
 # GM3_PP1
-SWISS_ROC_PP1<-read_csv("Src/TrackingData/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P1 PP1.csv")
+SWISS_ROC_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P1 PP1.csv")
 SWISS_ROC_PP1$game_name<-"2022-02-12 Switzerland at ROC"
 SWISS_ROC_PP1$penalty<-1
 # GM2_PP2
-SWISS_ROC_PP2<-read_csv("Src/TrackingData/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P1 PP2.csv")
+SWISS_ROC_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P1 PP2.csv")
 SWISS_ROC_PP2$game_name<-"2022-02-12 Switzerland at ROC"
 SWISS_ROC_PP2$penalty<-2
 # GM2_PP3
-SWISS_ROC_PP3<-read_csv("Src/TrackingData/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P3 PP3.csv")
+SWISS_ROC_PP3<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P3 PP3.csv")
 SWISS_ROC_PP3$game_name<-"2022-02-12 Switzerland at ROC"
 SWISS_ROC_PP3$penalty<-3
 # GM2_PP4
-SWISS_ROC_PP4<-read_csv("Src/TrackingData/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P3 PP5.csv")
+SWISS_ROC_PP4<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC P3 PP5.csv")
 SWISS_ROC_PP4$game_name<-"2022-02-12 Switzerland at ROC"
 SWISS_ROC_PP4$penalty<-5
 
@@ -828,7 +829,7 @@ SWISS_ROC_PP4_vsi$game_name<-"2022-02-12 Switzerland at ROC"
 SWISS_ROC_PP4_vsi$penalty<-5
 
 ## roster tracking
-SWISS_ROC_roster<-read_csv("Src/TrackingData/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC roster.csv")
+SWISS_ROC_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-12 Switzerland at ROC/2022-02-12 Switzerland at ROC roster.csv")
 
 
 ##### TRANSFORM & JOIN VIDEO FILES ######
@@ -1017,25 +1018,25 @@ rm(SWISS_ROC_roster)
 
 ########### GAME 4 FIN USA ############
 # GM4_PP1
-FIN_USA_PP1<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P2 PP1.csv")
+FIN_USA_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 USA at Finland/2022-02-14 USA at Finland P2 PP1.csv")
 FIN_USA_PP1$game_name<-"2022-02-14 USA at Finland"
 FIN_USA_PP1$penalty<-1
 # GM4_PP2
-FIN_USA_PP2<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P2 PP3.csv")
+FIN_USA_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 USA at Finland/2022-02-14 USA at Finland P2 PP3.csv")
 FIN_USA_PP2$game_name<-"2022-02-14 USA at Finland"
 FIN_USA_PP2$penalty<-3
 # GM4_PP3
-FIN_USA_PP3<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P3 PP4.csv")
+FIN_USA_PP3<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 USA at Finland/2022-02-14 USA at Finland P3 PP4.csv")
 FIN_USA_PP3$game_name<-"2022-02-14 USA at Finland"
 FIN_USA_PP3$penalty<-4
 # GM4_PP4
-FIN_USA_PP4<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P3 PP5.csv")
+FIN_USA_PP4<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 USA at Finland/2022-02-14 USA at Finland P3 PP5.csv")
 FIN_USA_PP4$game_name<-"2022-02-14 USA at Finland"
 FIN_USA_PP4$penalty<-5
 # GM4_PP5
-FIN_USA_PP5<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P3 PP6.csv")
-FIN_USA_PP5$game_name<-"2022-02-14 USA at Finland"
-FIN_USA_PP5$penalty<-6
+#FIN_USA_PP5<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA P3 PP6.csv")
+#FIN_USA_PP5$game_name<-"2022-02-14 USA at Finland"
+#FIN_USA_PP5$penalty<-6
 
 ### video data 
 # Game 1
@@ -1055,12 +1056,12 @@ FIN_USA_PP4_vsi<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/videoShots
 FIN_USA_PP4_vsi$game_name<-"2022-02-14 USA at Finland"
 FIN_USA_PP4_vsi$penalty<-5
 # Game 5
-FIN_USA_PP5_vsi<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/videoShotsInfo_2022-02-14 Finland at USA P3 PP6.csv")
-FIN_USA_PP5_vsi$game_name<-"2022-02-14 USA at Finland"
-FIN_USA_PP5_vsi$penalty<-6
+#FIN_USA_PP5_vsi<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/videoShotsInfo_2022-02-14 Finland at USA P3 PP6.csv")
+#FIN_USA_PP5_vsi$game_name<-"2022-02-14 USA at Finland"
+#FIN_USA_PP5_vsi$penalty<-6
 
 ## roster tracking
-FIN_USA_roster<-read_csv("Src/TrackingData/2022-02-14 Finland at USA/2022-02-14 Finland at USA roster.csv")
+FIN_USA_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 USA at Finland/2022-02-14 USA at Finland roster.csv")
 
 
 ##### TRANSFORM & JOIN VIDEO FILES ######
@@ -1230,48 +1231,48 @@ rm(FIN_USA_PP4_vsi)
 rm(v4)
 
 # PP5
-v5<-FIN_USA_PP5_vsi %>%
-  mutate(diff = frame_end_shot - frame_start_shot) %>%
-  group_by(shot_ind) %>%
-  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
-                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
+#v5<-FIN_USA_PP5_vsi %>%
+#  mutate(diff = frame_end_shot - frame_start_shot) %>%
+#  group_by(shot_ind) %>%
+#  do(data.frame(shot_ind=.$shot_ind, frame_id=seq(.$frame_start_shot,.$frame_end_shot,by=1),
+#                time = seq(.$`time_start_shot(sec)`,.$`time_end_shot(sec)`,length.out=.$diff+1)))
 
-FIN_USA_PP5<-FIN_USA_PP5 %>%
-  left_join(v5,by=c("frame_id"))
+#FIN_USA_PP5<-FIN_USA_PP5 %>%
+#  left_join(v5,by=c("frame_id"))
 
-FIN_USA_PP5<-FIN_USA_PP5 %>%
-  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
-  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
-         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
-  left_join(FIN_USA_PP5_vsi,by = c("game_name","penalty","shot_ind")) %>%
-  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
+#FIN_USA_PP5<-FIN_USA_PP5 %>%
+#  left_join(pp_info,by=c("game_name" = "game_name","penalty" = "penalty_number")) %>%
+#  mutate(clock_remaining_frame = total_game_seconds_remaining_start - time,
+#         clock_remaining_frame_round = round(total_game_seconds_remaining_start - time,0)) %>%
+#  left_join(FIN_USA_PP5_vsi,by = c("game_name","penalty","shot_ind")) %>%
+#  mutate(clock_remaining_frame_round_pxp_join = round(clock_remaining_frame + `time_start_shot(sec)`,0))
 
-FIN_USA_PP5 <-FIN_USA_PP5 %>%
-  left_join(pxp_womens_pp,by=c("game_name"="game_name",
-                               "penalty" = "penalty_number",
-                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
+#FIN_USA_PP5 <-FIN_USA_PP5 %>%
+#  left_join(pxp_womens_pp,by=c("game_name"="game_name",
+#                               "penalty" = "penalty_number",
+#                               "clock_remaining_frame_round_pxp_join" = "total_clock_seconds")) 
 
-FIN_USA_PP5<-FIN_USA_PP5 %>%
-  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
-                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
-                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
-  dplyr::rename(period = period.x,
-                team_name = team_name.x,
-                start_video_clock_seconds = start_video_clock_seconds.x,
-                end_video_clock_seconds = end_video_clock_seconds.x,
-                start_period = start_period.x,
-                end_period = end_period.x,
-                start_game_clock_seconds = start_game_clock_seconds.x,
-                end_game_clock_seconds = end_game_clock_seconds.x,
-                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
-                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
-  )
+#FIN_USA_PP5<-FIN_USA_PP5 %>%
+#  dplyr::select(-start_video_clock_seconds.y,-end_video_clock_seconds.y,-start_period.y,-end_period.y,
+#                -start_game_clock_seconds.y,-end_game_clock_seconds.y,-total_game_seconds_remaining_start.y,
+#                -total_game_seconds_remaining_end.y,-period.y,-team_name.y) %>%
+#  dplyr::rename(period = period.x,
+#                team_name = team_name.x,
+#                start_video_clock_seconds = start_video_clock_seconds.x,
+#                end_video_clock_seconds = end_video_clock_seconds.x,
+#                start_period = start_period.x,
+#                end_period = end_period.x,
+#                start_game_clock_seconds = start_game_clock_seconds.x,
+#                end_game_clock_seconds = end_game_clock_seconds.x,
+#                total_game_seconds_remaining_start = total_game_seconds_remaining_start.x,
+#                total_game_seconds_remaining_end = total_game_seconds_remaining_end.x
+#  )
 
-rm(FIN_USA_PP5_vsi)
-rm(v5)
+#rm(FIN_USA_PP5_vsi)
+#rm(v5)
 
 #### join to rosters ###
-FIN_USA_FINAL<-rbind(FIN_USA_PP1,FIN_USA_PP2,FIN_USA_PP3,FIN_USA_PP4,FIN_USA_PP5)
+FIN_USA_FINAL<-rbind(FIN_USA_PP1,FIN_USA_PP2,FIN_USA_PP3,FIN_USA_PP4)
 
 
 FIN_USA_FINAL<-FIN_USA_FINAL %>%
@@ -1289,19 +1290,19 @@ rm(FIN_USA_roster)
 
 ####### GAME 5 SWISS & Canada #####
 # GM5_PP1
-SWISS_CAN_PP1<-read_csv("Src/TrackingData/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P1 PP1.csv")
+SWISS_CAN_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P1 PP1.csv")
 SWISS_CAN_PP1$game_name<-"2022-02-14 Switzerland at Canada"
 SWISS_CAN_PP1$penalty<-1
 # GM4_PP2
-SWISS_CAN_PP2<-read_csv("Src/TrackingData/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P1 PP2.csv")
+SWISS_CAN_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P1 PP2.csv")
 SWISS_CAN_PP2$game_name<-"2022-02-14 Switzerland at Canada"
 SWISS_CAN_PP2$penalty<-2
 # GM4_PP3
-SWISS_CAN_PP3<-read_csv("Src/TrackingData/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P2 PP4.csv")
+SWISS_CAN_PP3<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P2 PP4.csv")
 SWISS_CAN_PP3$game_name<-"2022-02-14 Switzerland at Canada"
 SWISS_CAN_PP3$penalty<-4
 # GM4_PP4
-SWISS_CAN_PP4<-read_csv("Src/TrackingData/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P3 PP5.csv")
+SWISS_CAN_PP4<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada P3 PP5.csv")
 SWISS_CAN_PP4$game_name<-"2022-02-14 Switzerland at Canada"
 SWISS_CAN_PP4$penalty<-5
 
@@ -1328,7 +1329,7 @@ SWISS_CAN_PP5_vsi$game_name<-"2022-02-14 Switzerland at Canada"
 SWISS_CAN_PP5_vsi$penalty<-5
 
 ## roster tracking
-SWISS_CAN_roster<-read_csv("Src/TrackingData/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada roster.csv")
+SWISS_CAN_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-14 Switzerland at Canada/2022-02-14 Switzerland at Canada roster.csv")
 
 
 ##### TRANSFORM & JOIN VIDEO FILES ######
@@ -1525,35 +1526,35 @@ rm(SWISS_CAN_roster)
 
 ####### GAME 6 Switzerland at Finland ########
 # GM6_PP1
-SWISS_FIN_PP1<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P1 PP1.csv")
+SWISS_FIN_PP1<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P1 PP1.csv")
 SWISS_FIN_PP1$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP1$penalty<-1
 # GM6_PP2
-SWISS_FIN_PP2<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P1 PP2.csv")
+SWISS_FIN_PP2<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P1 PP2.csv")
 SWISS_FIN_PP2$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP2$penalty<-2
 # GM6_PP3
-SWISS_FIN_PP3<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP3.csv")
+SWISS_FIN_PP3<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP3.csv")
 SWISS_FIN_PP3$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP3$penalty<-3
 # GM6_PP4
-SWISS_FIN_PP4<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP4.csv")
+SWISS_FIN_PP4<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP4.csv")
 SWISS_FIN_PP4$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP4$penalty<-4
 # GM6_PP5
-SWISS_FIN_PP5<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP5.csv")
+SWISS_FIN_PP5<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P2 PP5.csv")
 SWISS_FIN_PP5$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP5$penalty<-5
 # GM6_PP6
-SWISS_FIN_PP6<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP6.csv")
+SWISS_FIN_PP6<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP6.csv")
 SWISS_FIN_PP6$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP6$penalty<-6
 # GM6_PP7
-SWISS_FIN_PP7<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP7.csv")
+SWISS_FIN_PP7<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP7.csv")
 SWISS_FIN_PP7$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP7$penalty<-7
 # GM6_PP8
-SWISS_FIN_PP8<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP8.csv")
+SWISS_FIN_PP8<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland P3 PP8.csv")
 SWISS_FIN_PP8$game_name<-"2022-02-16 Switzerland at Finland"
 SWISS_FIN_PP8$penalty<-8
 
@@ -1593,7 +1594,7 @@ SWISS_FIN_PP8_vsi$penalty<-8
 
 
 ## roster tracking
-SWISS_FIN_roster<-read_csv("Src/TrackingData/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland roster.csv")
+SWISS_FIN_roster<-read_csv("Src/TrackingData/the-bucketless_cleaned/2022-02-16 Switzerland at Finland/2022-02-16 Switzerland at Finland roster.csv")
 
 
 ##### TRANSFORM & JOIN VIDEO FILES ######

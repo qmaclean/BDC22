@@ -7,6 +7,8 @@ Data comes from: https://github.com/bigdatacup/Big-Data-Cup-2021
 
 Competition background: https://www.stathletes.com/big-data-cup/
 
+*** data based on stathletes & not bucketless; switched to bucketless data for finals
+
 
 ### Introduction
 Currently, there are a lot of advanced analytics focusing on [shot quality, defending shots,](https://drive4five.blog/2021/01/06/hockey-advanced-statistics-stats-nhl-sports-analytics-aidan-resnick/) and play during even strength. This year’s Big Data Cup focuses on play during penalties as a way to gain more insights into various “special teams” strategies. During the Tracking Data Panel at the 2022 Ottawa Hockey Analytics Conference (OTTHAC), measuring defensive performance was posed as the current area of tracking analytics that had the biggest opportunity to add more depth to. Shawn Ferris echoed this sentiment in a 2020 hockey-graphs article where he said, [“there is still much more to learn about shorthanded defense with respect to understanding optimal in-zone formations and evaluating individual players”.](https://hockey-graphs.com/2020/04/16/using-data-to-inform-shorthanded-neutral-zone-decisions/#more-24218) This paper aims to build on that narrative by using 2022 Women’s Olympic Hockey event & tracking data to model around successful defensive plays as a way to scout team and individual defensive performance during penalty plays. A successful defensive play is based on a (1) Takeaway, (2) Unsuccessful Pass, (3), Dump In/Out resulting in change of possession, (4) Blocked Shot attempt, (5) Unsuccessful Zone Entry, or (6) Puck Recovery resulting in change of possession.

@@ -1,5 +1,5 @@
 # BDC22
-Big Data Cup 22
+Big Data Cup 22 - Received 2nd Overall in Open Competition (Finalist)
 
 PDF file contains final paper. 
 
@@ -9,5 +9,7 @@ Competition background: https://www.stathletes.com/big-data-cup/
 
 *** PDF file contains data based on stathletes original data & 
 *** PowerPoint for finals is based on @the-bucketless cleaned data
+
+
 
 
